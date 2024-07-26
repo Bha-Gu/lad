@@ -48,7 +48,7 @@ class CutpointBinarizer:
 
                         # Testing for transition
                         if (len(labels) > 1 or len(__labels) > 1) or labels != __labels:
-                            __cutpoints.append((att, u + variation / 2.0))
+                            __cutpoints.append(u + variation / 2.0)
 
                 labels = __labels
                 u = v
