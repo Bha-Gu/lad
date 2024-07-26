@@ -1,21 +1,24 @@
+import pathlib
+
 import setuptools
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+here = pathlib.Path(__file__).parent.resolve()
+
+long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setuptools.setup(
     name="lad",
-    version="0.1",
-    author="Vaux Gomes",
-    author_email="vauxgomes@gmail.com",
+    version="0.1.0",
     description="Open source implementation of the Logical Analysis of Data Algorithm ",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/vauxgomes/lad",
-    packages=setuptools.find_packages(),
+    url="https://github.com/Bha-Gu/lad",
+    author="Bha-Gu",
+    # author_email="vauxgomes@gmail.com",
     classifiers=[
-        "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
     ],
+    packages=setuptools.find_packages(),
 )
