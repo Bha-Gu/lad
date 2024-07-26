@@ -2,7 +2,7 @@
 import numpy as np
 
 
-class CutpointBinarizer():
+class CutpointBinarizer:
 
     def __init__(self, tolerance=0.0):
         self.__tolerance = tolerance
@@ -35,7 +35,7 @@ class CutpointBinarizer():
                     # Testing for transition
                     if (len(labels) > 1 or len(__labels) > 1) or labels != __labels:
                         cid = len(self.__cutpoints)
-                        self.__cutpoints[cid] = (att, u + variation/2.0)
+                        self.__cutpoints[cid] = (att, u + variation / 2.0)
 
                 labels = __labels
                 u = v
