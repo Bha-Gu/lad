@@ -21,9 +21,22 @@ class CutpointBinarizer:
             labels = None  # Previuos labels
             u = None  # Previuos xi
 
-            # Finding transitions
-            for v in sorted(np.unique(row)):
+            __cutpoints = []
 
+            values = sorted(np.unique(row))
+            delta = 0
+            last = values[0]
+            for v in values[1:]:
+                delta += v - last
+                last = v
+
+            __tolerance = delta / len(values)
+
+            if len(values) <= 2:
+                __tolerance = 0.0
+
+            # Finding transitions
+            for v in values:
                 # Classes where v appears
                 indexes = np.where(row == v)[0]
                 __labels = set(y[indexes])
@@ -31,25 +44,28 @@ class CutpointBinarizer:
                 # Main condition
                 if labels is not None:
                     variation = v - u  # Current - Previous
-                    if variation > self.__tolerance:
+                    if variation > __tolerance:
 
                         # Testing for transition
                         if (len(labels) > 1 or len(__labels) > 1) or labels != __labels:
-                            self.__cutpoints.append((att, u + variation / 2.0))
+                            __cutpoints.append((att, u + variation / 2.0))
 
                 labels = __labels
                 u = v
+
+            self.__cutpoints.append(__cutpoints)
 
         return self.__cutpoints
 
     def transform(self, X):
         Xbin = np.empty((X.shape[0], 0), bool)
 
-        for att, cutpoint in self.__cutpoints:
-            # Binarizing
-            row = X[:, att]
-            row = row.reshape(X.shape[0], 1) <= cutpoint
-            Xbin = np.hstack((Xbin, row))
+        for att, cutpoints in enumerate(self.__cutpoints):
+            for cutpoint in cutpoints:
+                # Binarizing
+                row = X[:, att]
+                row = row.reshape(X.shape[0], 1) <= cutpoint
+                Xbin = np.hstack((Xbin, row))
 
         return Xbin
 
