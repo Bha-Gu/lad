@@ -24,6 +24,7 @@ class CutpointBinarizer:
             __cutpoints = []
 
             values = sorted(np.unique(row))
+            print(values)
             delta = 0
             last = values[0]
             for v in values[1:]:
