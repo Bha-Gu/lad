@@ -45,7 +45,7 @@ class CutpointBinarizer:
                 # Main condition
                 if labels is not None:
                     variation = v - u  # Current - Previous
-                    if variation > __tolerance:
+                    if variation > __tolerance * self.__tolerance:
 
                         # Testing for transition
                         if (len(labels) > 1 or len(__labels) > 1) or labels != __labels:
