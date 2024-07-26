@@ -36,6 +36,7 @@ class CutpointBinarizer:
             if len(values) <= 2:
                 __tolerance = 0.0
 
+            count = 1
             # Finding transitions
             for v in values:
                 # Classes where v appears
@@ -45,11 +46,16 @@ class CutpointBinarizer:
                 # Main condition
                 if labels is not None:
                     variation = v - u  # Current - Previous
-                    if variation > __tolerance * self.__tolerance:
+                    if variation > __tolerance * self.__tolerance / count:
 
                         # Testing for transition
                         if (len(labels) > 1 or len(__labels) > 1) or labels != __labels:
+                            count = 1
                             __cutpoints.append(u + variation / 2.0)
+                        else:
+                            count += 1
+                    else:
+                        count += 1
 
                 labels = __labels
                 u = v
