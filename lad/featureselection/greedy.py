@@ -5,10 +5,10 @@ class UnWeightedSetCoveringProblem:
     """Set covering problem builder"""
 
     def __init__(self):
-        self.__scp = np.array([])
+        self.__scp = []
 
     def fit(self, Xbin, y):
-        self.__scp.clear()
+        self.__scp = []
         labels = np.unique(y)
 
         for i in range(len(labels)):

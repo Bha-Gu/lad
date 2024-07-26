@@ -6,14 +6,13 @@ class CutpointBinarizer:
 
     def __init__(self, tolerance=0.0):
         self.__tolerance = tolerance
-        self.__cutpoints = {}
-        self.__size = 0
+        self.__cutpoints = []
 
     def get_cutpoints(self):
         return self.__cutpoints
 
     def fit(self, X, y):
-        self.__cutpoints.clear()
+        self.__cutpoints = []
 
         att = -1
         for row in X.T:
@@ -34,8 +33,7 @@ class CutpointBinarizer:
 
                     # Testing for transition
                     if (len(labels) > 1 or len(__labels) > 1) or labels != __labels:
-                        cid = len(self.__cutpoints)
-                        self.__cutpoints[cid] = (att, u + variation / 2.0)
+                        self.__cutpoints.append((att, u + variation / 2.0))
 
                 labels = __labels
                 u = v
@@ -45,7 +43,7 @@ class CutpointBinarizer:
     def transform(self, X):
         Xbin = np.empty((X.shape[0], 0), bool)
 
-        for att, cutpoint in self.__cutpoints.values():
+        for att, cutpoint in self.__cutpoints:
             # Binarizing
             row = X.T[att]
             row = row.reshape(X.shape[0], 1) <= cutpoint
