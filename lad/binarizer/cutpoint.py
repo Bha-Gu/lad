@@ -87,6 +87,7 @@ class CutpointBinarizer:
         for att, (cutpoints, type_data, values) in enumerate(
             zip(self.__cutpoints, self.__types_number, self.__mutator)
         ):
+            print("transform", att)
             if type_data:
                 for cutpoint in cutpoints:
                     # Binarizing
@@ -106,6 +107,7 @@ class CutpointBinarizer:
             else:
                 for value in values:
                     row = X.T[att]
+                    print(value)
                     row = row == value
                     Xbin = np.hstack((Xbin, row))
 
