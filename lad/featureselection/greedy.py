@@ -20,7 +20,7 @@ class UnWeightedSetCoveringProblem:
                         self.__scp.append(np.bitwise_xor(u, v))
 
         self.__scp = np.array(self.__scp)
-
+        print(self.__scp)
         return self.__scp
 
 
