@@ -20,7 +20,7 @@ class CutpointBinarizer:
         cc = X.shape[1]
 
         for att in range(cc):
-            row = X[:, att]
+            row = X.T[att]
             labels = None  # Previuos labels
             u = None  # Previuos xi
 
@@ -89,21 +89,21 @@ class CutpointBinarizer:
             if type_data:
                 for cutpoint in cutpoints:
                     # Binarizing
-                    row = X[:, att]
+                    row = X.T[att]
                     row = row.reshape(X.shape[0], 1) <= cutpoint
                     Xbin = np.hstack((Xbin, row))
                 if self.__db:
                     length = len(cutpoints)
                     for i in range(length):
                         for j in range(i + 1, length):
-                            row = X[:, att]
+                            row = X.T[att]
                             row = (
                                 row.reshape(X.shape[0], 1) > cutpoints[i]
                             ) <= cutpoints[j]
                             Xbin = np.hstack((Xbin, row))
             else:
                 for value in values:
-                    row = X[:, att]
+                    row = X.T[att]
                     row = row == value
                     Xbin = np.hstack((Xbin, row))
 
