@@ -83,7 +83,7 @@ class CutpointBinarizer:
 
     def transform(self, X):
         Xbin = np.empty((X.shape[0], 0), bool)
-
+        x = np.array(X)
         for att, (cutpoints, type_data, values) in enumerate(
             zip(self.__cutpoints, self.__types_number, self.__mutator)
         ):
