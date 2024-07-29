@@ -1,5 +1,7 @@
 import numpy as np
 
+# TODO restruct feature selection
+
 
 class UnWeightedSetCoveringProblem:
     """Set covering problem builder"""
