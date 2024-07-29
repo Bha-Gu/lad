@@ -18,12 +18,13 @@ class CutpointBinarizer:
         self.__cutpoints = []
 
         cc = X.shape[1]
+        y = np.array(y)
+        X = np.array(X)
 
         for att in range(cc):
             row = X.T[att]
             labels = None  # Previuos labels
             u = None  # Previuos xi
-            y = np.array(y)
 
             values = np.unique(row)
 
