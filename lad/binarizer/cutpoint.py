@@ -58,12 +58,8 @@ class CutpointBinarizer:
             # Finding transitions
             for v in sorted_values:
                 # Classes where v appears
-                print(row)
-                print(v)
                 indexes = np.where(row == v)
-                print(indexes)
                 __labels = set(y[indexes[0]].flatten())
-                print(__labels)
                 # Main condition
                 if labels is not None:
                     variation = v - u  # Current - Previous
