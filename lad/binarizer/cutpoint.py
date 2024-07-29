@@ -60,7 +60,7 @@ class CutpointBinarizer:
                 indexes = np.where(row == v)[0]
                 print(indexes)
                 __labels = set(y[indexes].flatten())
-
+                print(__labels)
                 # Main condition
                 if labels is not None:
                     variation = v - u  # Current - Previous
