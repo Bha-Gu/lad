@@ -57,6 +57,8 @@ class CutpointBinarizer:
             for v in sorted_values:
                 # Classes where v appears
                 indexes = np.where(row == v)[0]
+                print(indexes)
+                print(y)
                 __labels = set(y[indexes])
 
                 # Main condition
