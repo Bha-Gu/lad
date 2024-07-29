@@ -83,7 +83,7 @@ class CutpointBinarizer:
 
     def transform(self, X):
         Xbin = np.empty((X.shape[0], 0), bool)
-        x = np.array(X)
+        X = np.array(X)
         for att, (cutpoints, type_data, values) in enumerate(
             zip(self.__cutpoints, self.__types_number, self.__mutator)
         ):
@@ -91,6 +91,7 @@ class CutpointBinarizer:
                 for cutpoint in cutpoints:
                     # Binarizing
                     row = X.T[att]
+
                     row = row.reshape(X.shape[0], 1) <= cutpoint
                     Xbin = np.hstack((Xbin, row))
                 if self.__db:
