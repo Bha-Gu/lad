@@ -23,6 +23,7 @@ class CutpointBinarizer:
             row = X.T[att]
             labels = None  # Previuos labels
             u = None  # Previuos xi
+            y = np.array(y)
 
             values = np.unique(row)
 
