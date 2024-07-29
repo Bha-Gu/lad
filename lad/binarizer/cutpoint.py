@@ -41,7 +41,7 @@ class CutpointBinarizer:
             __cutpoints = []
 
             sorted_values = sorted(values)
-            print(sorted_values)
+            print("values", sorted_values)
             delta = 0
             last = sorted_values[0]
             for v in sorted_values[1:]:
@@ -59,7 +59,6 @@ class CutpointBinarizer:
                 # Classes where v appears
                 indexes = np.where(row == v)[0]
                 print(indexes)
-                print(y)
                 __labels = set(y[indexes].flatten())
 
                 # Main condition
