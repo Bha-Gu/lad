@@ -4,9 +4,12 @@ import numpy as np
 
 class CutpointBinarizer:
     # TODO implement Double Sided Binarisation
-    def __init__(self, tolerance=0.0):
+    def __init__(self, tolerance=1.0, double_binarization=True):
         self.__tolerance = tolerance
+        self.__types_number = []
         self.__cutpoints = []
+        self.__mutator = []
+        self.__db = double_binarization
 
     def get_cutpoints(self):
         return self.__cutpoints
@@ -21,24 +24,37 @@ class CutpointBinarizer:
             labels = None  # Previuos labels
             u = None  # Previuos xi
 
+            values = np.unique(row)
+
+            values_type = values.dtype
+
+            if np.issubdtype(values_type, np.number):
+                self.__types_number.append(True)
+                self.__mutator.append([])
+            else:
+                self.__types_number.append(False)
+                self.__mutator.append(values)
+                self.__cutpoints.append([])
+                continue
+
             __cutpoints = []
 
-            values = sorted(np.unique(row))
-            print(values)
+            sorted_values = sorted(values)
+            print(sorted_values)
             delta = 0
-            last = values[0]
-            for v in values[1:]:
+            last = sorted_values[0]
+            for v in sorted_values[1:]:
                 delta += v - last
                 last = v
 
-            __tolerance = delta / len(values)
+            __tolerance = delta / len(sorted_values)
 
-            if len(values) <= 2:
+            if len(sorted_values) <= 2:
                 __tolerance = 0.0
 
             count = 1
             # Finding transitions
-            for v in values:
+            for v in sorted_values:
                 # Classes where v appears
                 indexes = np.where(row == v)[0]
                 __labels = set(y[indexes])
@@ -67,12 +83,29 @@ class CutpointBinarizer:
     def transform(self, X):
         Xbin = np.empty((X.shape[0], 0), bool)
 
-        for att, cutpoints in enumerate(self.__cutpoints):
-            for cutpoint in cutpoints:
-                # Binarizing
-                row = X[:, att]
-                row = row.reshape(X.shape[0], 1) <= cutpoint
-                Xbin = np.hstack((Xbin, row))
+        for att, (cutpoints, type_data, values) in enumerate(
+            zip(self.__cutpoints, self.__types_number, self.__mutator)
+        ):
+            if type_data:
+                for cutpoint in cutpoints:
+                    # Binarizing
+                    row = X[:, att]
+                    row = row.reshape(X.shape[0], 1) <= cutpoint
+                    Xbin = np.hstack((Xbin, row))
+                if self.__db:
+                    length = len(cutpoints)
+                    for i in range(length):
+                        for j in range(i + 1, length):
+                            row = X[:, att]
+                            row = (
+                                row.reshape(X.shape[0], 1) > cutpoints[i]
+                            ) <= cutpoints[j]
+                            Xbin = np.hstack((Xbin, row))
+            else:
+                for value in values:
+                    row = X[:, att]
+                    row = row == value
+                    Xbin = np.hstack((Xbin, row))
 
         return Xbin
 
