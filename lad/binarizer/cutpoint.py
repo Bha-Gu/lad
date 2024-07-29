@@ -60,7 +60,7 @@ class CutpointBinarizer:
                 indexes = np.where(row == v)[0]
                 print(indexes)
                 print(y)
-                __labels = set(y[indexes])
+                __labels = set(y[indexes].flatten())
 
                 # Main condition
                 if labels is not None:
