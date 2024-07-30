@@ -21,7 +21,7 @@ class UnWeightedSetCoveringProblem:
         y = np.asarray(y)
 
         # Ensure that self.__selected is a numpy array for efficient indexing
-        self.__selected = np.asarray(self.__selected)
+        self.__selected = np.asarray(self.__selected).astype(int)
 
         for i in range(len(labels)):
             for j in range(i + 1, len(labels)):
