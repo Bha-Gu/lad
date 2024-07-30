@@ -1,3 +1,5 @@
+import time  # Debug import
+
 import numpy as np
 
 # TODO restruct feature selection
@@ -6,11 +8,12 @@ import numpy as np
 class UnWeightedSetCoveringProblem:
     """Set covering problem builder"""
 
-    def __init__(self):
+    def __init__(self, selected=[]):
         self.__scp = []
+        self.__selected = selected
 
     def fit(self, Xbin, y):
-        self.__scp = []
+        self.__scp = np.zeros(Xbin.shape[1])
         labels = np.unique(y)
 
         for i in range(len(labels)):
@@ -19,7 +22,9 @@ class UnWeightedSetCoveringProblem:
                 # Crossover
                 for u in Xbin[y == labels[i]]:
                     for v in Xbin[y == labels[j]]:
-                        self.__scp.append(np.bitwise_xor(u, v))
+                        inc = np.bitwise_xor(u, v)
+                        if not np.any(inc[self.__selected]):
+                            self.__scp += inc
 
         self.__scp = np.array(self.__scp)
         print(self.__scp)
@@ -42,17 +47,19 @@ class GreedySetCover:
         builder = UnWeightedSetCoveringProblem()
         scp = builder.fit(Xbin, y)
 
-        # print('SCP', scp.shape)
+        print("SCP", scp.shape)
 
-        while len(scp):
-            sum_ = scp.sum(axis=0)
-            att = np.argmax(sum_)
+        while True:
+            # sum_ = scp.sum(axis=0)
+            att = np.argmax(scp)
 
-            if sum_[att] == 0:
+            if scp[att] == 0:
                 break
 
-            scp = np.delete(scp, np.where(scp[:, att]), axis=0)
+            # scp = np.delete(scp, np.where(scp[:, att]), axis=0)
             self.__selected.append(att)
+            builder = UnWeightedSetCoveringProblem(self.__selected)
+            scp = builder.fit(Xbin, y)
 
         self.__selected.sort()
 
