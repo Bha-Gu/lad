@@ -16,17 +16,34 @@ class UnWeightedSetCoveringProblem:
         self.__scp = np.zeros(Xbin.shape[1])
         labels = np.unique(y)
 
+        # Convert Xbin and y to numpy arrays if they aren't already
+        Xbin = np.asarray(Xbin)
+        y = np.asarray(y)
+
+        # Ensure that self.__selected is a numpy array for efficient indexing
+        self.__selected = np.asarray(self.__selected)
+
         for i in range(len(labels)):
             for j in range(i + 1, len(labels)):
+                # Get binary samples for the current label pair
+                X_i = Xbin[y == labels[i]]
+                X_j = Xbin[y == labels[j]]
 
-                # Crossover
-                for u in Xbin[y == labels[i]]:
-                    for v in Xbin[y == labels[j]]:
-                        inc = np.bitwise_xor(u, v)
-                        if not np.any(inc[self.__selected]):
-                            self.__scp += inc
+                for u in X_i:
+                    # Calculate XOR with each v in X_j in batches
+                    batch_size = 1000  # Adjust batch size based on available memory
+                    for start in range(0, len(X_j), batch_size):
+                        end = start + batch_size
+                        X_j_batch = X_j[start:end]
 
-        self.__scp = np.array(self.__scp)
+                        xor_matrix = np.bitwise_xor(u, X_j_batch)
+
+                        # Check the condition across the selected indices
+                        mask = ~np.any(xor_matrix[:, self.__selected], axis=1)
+
+                        # Sum the increments where the mask is True
+                        self.__scp += xor_matrix[mask].sum(axis=0)
+
         print(self.__scp)
         return self.__scp
 
