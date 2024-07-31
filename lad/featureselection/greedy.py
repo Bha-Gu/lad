@@ -8,52 +8,37 @@ import numpy as np
 class UnWeightedSetCoveringProblem:
     """Set covering problem builder"""
 
-    def __init__(self, selected=[]):
+    def __init__(self, selected=[], y_important=[]):
         self.__scp = []
         self.__selected = selected
+        self.__yi = y_important
 
     def fit(self, Xbin, y):
-        self.__scp = np.zeros(Xbin.shape[1])
+        self.__scp = []
         labels = np.unique(y)
-
-        # Convert Xbin and y to numpy arrays if they aren't already
-        Xbin = np.asarray(Xbin)
-        y = np.asarray(y)
-
-        # Ensure that self.__selected is a numpy array for efficient indexing
-        self.__selected = np.asarray(self.__selected).astype(int)
 
         for i in range(len(labels)):
             for j in range(i + 1, len(labels)):
-                # Get binary samples for the current label pair
-                X_i = Xbin[y == labels[i]]
-                X_j = Xbin[y == labels[j]]
+                if len(self.__yi):
+                    if not ((i in self.__yi) or (j in self.__yi)):
+                        continue
+                # Crossover
+                for u in Xbin[y == labels[i]]:
+                    for v in Xbin[y == labels[j]]:
+                        self.__scp.append(np.bitwise_xor(u, v))
 
-                for u in X_i:
-                    # Calculate XOR with each v in X_j in batches
-                    batch_size = 1000  # Adjust batch size based on available memory
-                    for start in range(0, len(X_j), batch_size):
-                        end = start + batch_size
-                        X_j_batch = X_j[start:end]
+        self.__scp = np.array(self.__scp)
 
-                        xor_matrix = np.bitwise_xor(u, X_j_batch)
-
-                        # Check the condition across the selected indices
-                        mask = ~np.any(xor_matrix[:, self.__selected], axis=1)
-
-                        # Sum the increments where the mask is True
-                        self.__scp += xor_matrix[mask].sum(axis=0)
-
-        print(self.__scp)
         return self.__scp
 
 
 class GreedySetCover:
     """Set covering problem solver"""
 
-    def __init__(self):
+    def __init__(self, y_importances=[[]]):
         self.__selected = []
         self.__scp = None
+        self.__yis = y_importances
 
     def get_selected(self):
         return np.array(self.__selected)
@@ -61,22 +46,21 @@ class GreedySetCover:
     def fit(self, Xbin, y):
         self.__selected.clear()
 
-        builder = UnWeightedSetCoveringProblem()
-        scp = builder.fit(Xbin, y)
-
-        print("SCP", scp.shape)
-
-        while True:
-            # sum_ = scp.sum(axis=0)
-            att = np.argmax(scp)
-
-            if scp[att] == 0:
-                break
-
-            # scp = np.delete(scp, np.where(scp[:, att]), axis=0)
-            self.__selected.append(att)
-            builder = UnWeightedSetCoveringProblem(self.__selected)
+        for yi in self.__yis:
+            builder = UnWeightedSetCoveringProblem(self.__selected, yi)
             scp = builder.fit(Xbin, y)
+
+            # print('SCP', scp.shape)
+
+            while len(scp):
+                sum_ = scp.sum(axis=0)
+                att = np.argmax(sum_)
+
+                if sum_[att] == 0:
+                    break
+
+                scp = np.delete(scp, np.where(scp[:, att]), axis=0)
+                self.__selected.append(att)
 
         self.__selected.sort()
 
