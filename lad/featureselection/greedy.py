@@ -21,11 +21,14 @@ class UnWeightedSetCoveringProblem:
             for j in range(i + 1, len(labels)):
                 if len(self.__yi):
                     if not ((i in self.__yi) or (j in self.__yi)):
+                        print("Skip ", i, j)
                         continue
                 # Crossover
                 for u in Xbin[y == labels[i]]:
                     for v in Xbin[y == labels[j]]:
-                        self.__scp.append(np.bitwise_xor(u, v))
+                        inc = np.bitwise_xor(u, v)
+                        if not np.any(inc[self.__selected]):
+                            self.__scp.append(inc)
 
         self.__scp = np.array(self.__scp)
 
@@ -35,10 +38,11 @@ class UnWeightedSetCoveringProblem:
 class GreedySetCover:
     """Set covering problem solver"""
 
-    def __init__(self, y_importances=[[]]):
+    def __init__(self, y_importances=[]):
         self.__selected = []
         self.__scp = None
         self.__yis = y_importances
+        self.__yis.append([])
 
     def get_selected(self):
         return np.array(self.__selected)
@@ -50,7 +54,7 @@ class GreedySetCover:
             builder = UnWeightedSetCoveringProblem(self.__selected, yi)
             scp = builder.fit(Xbin, y)
 
-            # print('SCP', scp.shape)
+            print("SCP", scp.shape)
 
             while len(scp):
                 sum_ = scp.sum(axis=0)

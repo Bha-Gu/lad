@@ -49,11 +49,11 @@ class LADClassifier(BaseEstimator, ClassifierMixin):
         values: {eager, lazy}
     """
 
-    def __init__(self, tolerance=0.0, purity=0.95, mode="eager"):
+    def __init__(self, tolerance=0.0, purity=0.95, mode="eager", y_importances=[]):
         self.tolerance = tolerance
         self.purity = purity
         self.mode = mode
-
+        self.yis = y_importances
         self.model = None
 
     def fit(self, X, y):
@@ -65,7 +65,7 @@ class LADClassifier(BaseEstimator, ClassifierMixin):
         Xbin = cpb.fit_transform(X, y)
 
         print("# Feature Selection")
-        gsc = GreedySetCover()
+        gsc = GreedySetCover(self.yis)
         Xbin = gsc.fit_transform(Xbin, y)
 
         print("# Rule building")
