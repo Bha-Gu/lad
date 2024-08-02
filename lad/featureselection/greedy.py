@@ -80,7 +80,7 @@ class GreedySetCover:
                 break
 
             self.__selected.sort()
-
+            print(self.__selected)
             builder = UnWeightedSetCoveringProblem(self.__selected)
             scp = builder.fit(Xbin, y)
 
