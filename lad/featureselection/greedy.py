@@ -37,7 +37,7 @@ class UnWeightedSetCoveringProblem:
         YT = np.sum(y_t, axis=1)
         T = np.sum(total, axis=1)
 
-        pos = np.zeros((length, feature_count))
+        pos = np.zeros((length, feature_count), dtype=int)
 
         for i in range(length):
             pos[i] += YT[i] * T[i]
