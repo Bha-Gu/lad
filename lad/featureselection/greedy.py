@@ -8,41 +8,60 @@ import numpy as np
 class UnWeightedSetCoveringProblem:
     """Set covering problem builder"""
 
-    def __init__(self, selected=[], y_important=[]):
+    def __init__(self, selected=[]):
         self.__scp = []
         self.__selected = selected
-        self.__yi = y_important
 
     def fit(self, Xbin, y):
-        self.__scp = []
+        length = 2 ** len(self.__selected)
         labels = np.unique(y)
+        class_count = len(labels)
+        feature_count = Xbin.shape[1]
+        sample_count = Xbin.shape[0]
+        total = np.zeros((length, class_count, feature_count))
+        y_t = np.zeros((length, class_count))
 
-        for i in range(len(labels)):
-            for j in range(i + 1, len(labels)):
-                if len(self.__yi):
-                    if not ((i in self.__yi) or (j in self.__yi)):
-                        print("Skip ", i, j)
-                        continue
-                # Crossover
-                for u in Xbin[y == labels[i]]:
-                    for v in Xbin[y == labels[j]]:
-                        inc = np.bitwise_xor(u, v)
-                        if not np.any(inc[self.__selected]):
-                            self.__scp.append(inc)
+        a = Xbin[:, self.__selected]
+        b = []
+        y_idx = []
+        for i in y:
+            y_idx.append(np.where(labels == i)[0][0])
+        for i in a:
+            idx = 0
+            for jdx, j in enumerate(i):
+                idx += (jdx + 1) * j
+            b.append(idx)
 
-        self.__scp = np.array(self.__scp)
+        for i in range(sample_count):
+            total[b[i]][y[i]] += Xbin[i]
+            y_t[b[i]][y[i]] += 1
 
-        return self.__scp
+        YT = np.sum(y_t, axis=1)
+        T = np.sum(total, axis=1)
+
+        pos = np.zeros((length, feature_count))
+
+        for i in range(length):
+            pos[i] += YT[i] * T[i]
+            for j in range(class_count):
+                pos[i] -= y_t[i, j] * total[i, j, :]
+                for k in range(j + 1, class_count):
+                    pos[i] -= 2 * total[i, j, :] * total[i, k, :]
+
+        pos = np.sum(pos, axis=0)
+        # print(pos)
+        if np.sum(pos) == 0:
+            return None
+        return np.argmax(pos)
 
 
 class GreedySetCover:
     """Set covering problem solver"""
 
-    def __init__(self, y_importances=[]):
+    def __init__(self, max_features=0):
         self.__selected = []
         self.__scp = None
-        self.__yis = y_importances
-        self.__yis.append([])
+        self.__max = max_features
 
     def get_selected(self):
         return np.array(self.__selected)
@@ -50,21 +69,20 @@ class GreedySetCover:
     def fit(self, Xbin, y):
         self.__selected.clear()
 
-        for yi in self.__yis:
-            builder = UnWeightedSetCoveringProblem(self.__selected, yi)
+        builder = UnWeightedSetCoveringProblem(self.__selected)
+        scp = builder.fit(Xbin, y)
+
+        while scp:
+            print(scp)
+            self.__selected.append(scp)
+
+            if len(self.__selected) == self.__max:
+                break
+
+            self.__selected.sort()
+
+            builder = UnWeightedSetCoveringProblem(self.__selected)
             scp = builder.fit(Xbin, y)
-
-            print("SCP", scp.shape)
-
-            while len(scp):
-                sum_ = scp.sum(axis=0)
-                att = np.argmax(sum_)
-
-                if sum_[att] == 0:
-                    break
-
-                scp = np.delete(scp, np.where(scp[:, att]), axis=0)
-                self.__selected.append(att)
 
         self.__selected.sort()
 
