@@ -45,7 +45,7 @@ class UnWeightedSetCoveringProblem:
                 pos[i] -= y_t[i, j] * total[i, j, :]
                 for k in range(j + 1, class_count):
                     pos[i] -= 2 * total[i, j, :] * total[i, k, :]
-        print(pos)
+        # print(pos)
         pos = np.sum(pos, axis=0)
         print(pos)
         invalid = np.where(pos == 0)
