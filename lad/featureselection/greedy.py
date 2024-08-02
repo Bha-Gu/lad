@@ -33,8 +33,8 @@ class UnWeightedSetCoveringProblem:
             b.append(idx)
 
         for i in range(sample_count):
-            total[b[i]][y[i]] += Xbin[i]
-            y_t[b[i]][y[i]] += 1
+            total[b[i]][y_idx[i]] += Xbin[i]
+            y_t[b[i]][y_idx[i]] += 1
 
         YT = np.sum(y_t, axis=1)
         T = np.sum(total, axis=1)
