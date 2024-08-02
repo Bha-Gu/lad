@@ -81,6 +81,7 @@ class GreedySetCover:
         while scp:
             if scp is None:
                 break
+            print(invalid)
             mask = np.ones(Xbin_prune.shape[1], dtype=bool)
             mask[invalid] = False
             mask[effective_selected] = True
