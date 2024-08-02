@@ -50,9 +50,10 @@ class UnWeightedSetCoveringProblem:
 
         pos = np.sum(pos, axis=0)
         print(pos)
+        invalid = np.where(pos == 0)
         if np.sum(pos) == 0:
-            return None
-        return np.argmax(pos)
+            return None, invalid
+        return np.argmax(pos), invalid
 
 
 class GreedySetCover:
@@ -70,19 +71,48 @@ class GreedySetCover:
         self.__selected.clear()
 
         builder = UnWeightedSetCoveringProblem(self.__selected)
-        scp = builder.fit(Xbin, y)
+        scp, invalid = builder.fit(Xbin, y)
+
+        invalids = []
+
+        Xbin_prune = Xbin.copy()
 
         while scp:
-            print(scp)
-            self.__selected.append(scp)
+            if scp is None:
+                break
+            mask = np.ones(Xbin_prune.shape[1], dtype=bool)
+            mask[invalid] = False
+            mask[effective_selected] = True
+            invalid = np.where(mask == False)
+            invalid = invalid[0]
+            Xbin_prune = Xbin_prune[:, mask]
+            actual_next_feature = scp
+            for i in invalids:
+                if i < actual_next_feature:
+                    actual_next_feature += 1
+                for j in range(len(invalid)):
+                    if i < invalid[j]:
+                        invalid[j] += 1
+            for i in invalid:
+                invalids.append(i)
+            invalids.sort()
 
+            self.__selected.append(actual_next_feature)
             if len(self.__selected) == self.__max:
                 break
+
+            effective_selected = []
+            for i in range(len(self.__selected)):
+                effective_selected.append(self.__selected[i])
+                for j in range(len(invalids)):
+                    if self.__selected[i] >= invalids[j]:
+                        effective_selected[i] -= 1
+            print(scp)
 
             self.__selected.sort()
             print(self.__selected)
             builder = UnWeightedSetCoveringProblem(self.__selected)
-            scp = builder.fit(Xbin, y)
+            scp, invalid = builder.fit(Xbin, y)
 
         self.__selected.sort()
 
