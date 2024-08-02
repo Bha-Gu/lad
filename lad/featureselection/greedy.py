@@ -103,6 +103,8 @@ class GreedySetCover:
             if len(self.__selected) == self.__max:
                 break
 
+            self.__selected.sort()
+
             effective_selected = []
             for i in range(len(self.__selected)):
                 effective_selected.append(self.__selected[i])
@@ -111,9 +113,8 @@ class GreedySetCover:
                         effective_selected[i] -= 1
             print(scp)
 
-            self.__selected.sort()
             print(self.__selected)
-            builder = UnWeightedSetCoveringProblem(self.__selected)
+            builder = UnWeightedSetCoveringProblem(effective_selected)
             scp, invalid = builder.fit(Xbin_prune, y)
 
         self.__selected.sort()
