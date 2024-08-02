@@ -114,7 +114,7 @@ class GreedySetCover:
             self.__selected.sort()
             print(self.__selected)
             builder = UnWeightedSetCoveringProblem(self.__selected)
-            scp, invalid = builder.fit(Xbin, y)
+            scp, invalid = builder.fit(Xbin_prune, y)
 
         self.__selected.sort()
 
