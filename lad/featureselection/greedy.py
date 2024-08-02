@@ -49,7 +49,7 @@ class UnWeightedSetCoveringProblem:
                     pos[i] -= 2 * total[i, j, :] * total[i, k, :]
 
         pos = np.sum(pos, axis=0)
-        # print(pos)
+        print(pos)
         if np.sum(pos) == 0:
             return None
         return np.argmax(pos)
