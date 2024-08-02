@@ -1,5 +1,3 @@
-import time  # Debug import
-
 import numpy as np
 
 # TODO restruct feature selection
@@ -18,8 +16,8 @@ class UnWeightedSetCoveringProblem:
         class_count = len(labels)
         feature_count = Xbin.shape[1]
         sample_count = Xbin.shape[0]
-        total = np.zeros((length, class_count, feature_count))
-        y_t = np.zeros((length, class_count))
+        total = np.zeros((length, class_count, feature_count), dtype=int)
+        y_t = np.zeros((length, class_count), dtype=int)
 
         a = Xbin[:, self.__selected]
         b = []
@@ -47,7 +45,7 @@ class UnWeightedSetCoveringProblem:
                 pos[i] -= y_t[i, j] * total[i, j, :]
                 for k in range(j + 1, class_count):
                     pos[i] -= 2 * total[i, j, :] * total[i, k, :]
-
+        print(pos)
         pos = np.sum(pos, axis=0)
         print(pos)
         invalid = np.where(pos == 0)
