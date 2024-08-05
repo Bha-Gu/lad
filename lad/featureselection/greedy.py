@@ -79,7 +79,7 @@ class GreedySetCover:
         for i in y:
             y_idx.append(np.where(labels == i)[0][0])
 
-        subset_index = np.zeros(sample_count)
+        subset_index = np.zeros(sample_count, dtype=int)
 
         invalids = []
 
