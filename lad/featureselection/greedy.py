@@ -118,7 +118,7 @@ class GreedySetCover:
 
             base_best = best
             for invalid in invalids:
-                if invalid < base_best:
+                if invalid <= base_best:
                     base_best += 1
 
             self.__selected.append(base_best)
@@ -135,7 +135,7 @@ class GreedySetCover:
 
             for invalid in invalids:
                 for i in range(len(rejected)):
-                    if invalid < base_rejected[i]:
+                    if invalid <= base_rejected[i]:
                         base_rejected[i] += 1
 
             invalids.append(base_best)
