@@ -83,6 +83,7 @@ class GreedySetCover:
         invalids = []
 
         while True:
+            print(self.__selected)
             subset_count = 2 ** len(self.__selected)
             feature_count = Xbin_prune.shape[1]
 
