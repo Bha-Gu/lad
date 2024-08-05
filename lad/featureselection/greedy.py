@@ -111,7 +111,7 @@ class GreedySetCover:
             effective_selected = scp
 
             for j in invalids:
-                if self.__selected[i] >= j:
+                if scp >= j:
                     effective_selected -= 1
             print(scp)
             print(self.__selected)
