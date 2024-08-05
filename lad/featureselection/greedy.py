@@ -31,8 +31,6 @@ class UnWeightedSetCoveringProblem:
                 idx += (jdx + 1) * j
             b.append(idx)
 
-        print(sample_count)
-        print(a.shape)
         for i in range(sample_count):
             total[b[i]][y_idx[i]] += Xbin[i]
             y_t[b[i]][y_idx[i]] += 1
@@ -84,7 +82,6 @@ class GreedySetCover:
         while scp:
             if scp is None:
                 break
-            print(invalid)
             mask = np.ones(Xbin_prune.shape[1], dtype=bool)
             mask[invalid] = False
             mask[effective_selected] = False
