@@ -69,7 +69,7 @@ class GreedySetCover:
         return np.array(self.__selected)
 
     def fit(self, Xbin, y):
-        self.__selected = np.array([[]])
+        self.__selected = []
 
         builder = UnWeightedSetCoveringProblem(
             np.array([[] for _ in range(Xbin.shape[0])])
