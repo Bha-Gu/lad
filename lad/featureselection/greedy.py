@@ -76,7 +76,7 @@ class GreedySetCover:
 
         invalids = []
 
-        effective_selected = []
+        effective_selected = scp
         Xbin_prune = Xbin.copy()
 
         while scp:
