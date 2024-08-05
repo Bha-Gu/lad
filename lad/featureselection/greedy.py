@@ -85,7 +85,7 @@ class GreedySetCover:
             mask = np.ones(Xbin_prune.shape[1], dtype=bool)
             mask[invalid] = False
             mask[effective_selected] = False
-            invalid = np.where(mask == False)
+            invalid = np.where(mask is False)
             invalid = invalid[0]
             Xbin_prune = Xbin_prune[:, mask]
             actual_next_feature = scp
@@ -108,12 +108,11 @@ class GreedySetCover:
             self.__selected.sort()
 
             selected_list = Xbin[:, self.__selected]
-            effective_selected = []
-            for i in range(len(self.__selected)):
-                effective_selected.append(self.__selected[i])
-                for j in invalids:
-                    if self.__selected[i] >= j:
-                        effective_selected[i] -= 1
+            effective_selected = scp
+
+            for j in invalids:
+                if self.__selected[i] >= j:
+                    effective_selected -= 1
             print(scp)
             print(self.__selected)
             print(effective_selected)
