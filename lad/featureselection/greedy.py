@@ -87,7 +87,7 @@ class GreedySetCover:
             mask[invalid] = False
             print(mask, invalid)
             mask[effective_selected] = False
-            invalid = np.where(mask is False)
+            invalid = np.where(not mask)
             invalid = invalid[0]
             Xbin_prune = Xbin_prune[:, mask]
             actual_next_feature = scp
