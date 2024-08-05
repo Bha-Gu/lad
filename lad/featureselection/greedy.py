@@ -89,7 +89,6 @@ class GreedySetCover:
             y_t = np.zeros((subset_count, class_count), dtype=int)
 
             for i in range(sample_count):
-                print(subset_index)
                 total[subset_index[i]][y_idx[i]] += Xbin_prune[i]
                 y_t[subset_index[i]][y_idx[i]] += 1
 
@@ -121,9 +120,9 @@ class GreedySetCover:
                 break
             self.__selected.sort()
 
-            for i in range(sample_count):
-                if Xbin_prune[i, best]:
-                    subset_index += 2 ** (len(self.__selected) - 1)
+            for sample in range(sample_count):
+                if Xbin_prune[sample, best]:
+                    subset_index[sample] += 2 ** (len(self.__selected) - 1)
 
             rejected = np.where(final_rank == 0)[0]
             base_best = best
