@@ -11,7 +11,7 @@ class UnWeightedSetCoveringProblem:
         self.__selected = selected
 
     def fit(self, Xbin, y):
-        length = 2 ** len(self.__selected)
+        length = 2 ** self.__selected.shape[1]
         labels = np.unique(y)
         class_count = len(labels)
         feature_count = Xbin.shape[1]
@@ -19,7 +19,7 @@ class UnWeightedSetCoveringProblem:
         total = np.zeros((length, class_count, feature_count), dtype=int)
         y_t = np.zeros((length, class_count), dtype=int)
 
-        a = Xbin[:, self.__selected]
+        a = self.__selected
         b = []
         y_idx = []
         for i in y:
@@ -82,7 +82,7 @@ class GreedySetCover:
             print(invalid)
             mask = np.ones(Xbin_prune.shape[1], dtype=bool)
             mask[invalid] = False
-            mask[effective_selected] = True
+            mask[effective_selected] = False
             invalid = np.where(mask == False)
             invalid = invalid[0]
             Xbin_prune = Xbin_prune[:, mask]
@@ -103,6 +103,7 @@ class GreedySetCover:
 
             self.__selected.sort()
 
+            selected_list = Xbin[:, self.__selected]
             effective_selected = []
             for i in range(len(self.__selected)):
                 effective_selected.append(self.__selected[i])
@@ -112,7 +113,7 @@ class GreedySetCover:
             print(scp)
 
             print(self.__selected)
-            builder = UnWeightedSetCoveringProblem(effective_selected)
+            builder = UnWeightedSetCoveringProblem(selected_list)
             scp, invalid = builder.fit(Xbin_prune, y)
 
         self.__selected.sort()
