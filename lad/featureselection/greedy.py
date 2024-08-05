@@ -96,7 +96,8 @@ class GreedySetCover:
                     if i < invalid[j]:
                         invalid[j] += 1
             for i in invalid:
-                invalids.append(i)
+                if i not in invalids:
+                    invalids.append(i)
             invalids.sort()
 
             self.__selected.append(actual_next_feature)
@@ -113,7 +114,6 @@ class GreedySetCover:
                     if self.__selected[i] >= invalids[j]:
                         effective_selected[i] -= 1
             print(scp)
-            print(invalids)
             print(self.__selected)
             builder = UnWeightedSetCoveringProblem(selected_list)
             scp, invalid = builder.fit(Xbin_prune, y)
