@@ -50,6 +50,7 @@ class UnWeightedSetCoveringProblem:
         pos = np.sum(pos, axis=0)
         print(pos)
         invalid = np.where(pos == 0)
+        print(invalid)
         if np.sum(pos) == 0:
             return None, invalid
         return np.argmax(pos), invalid
