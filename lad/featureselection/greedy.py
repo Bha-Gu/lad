@@ -85,11 +85,9 @@ class GreedySetCover:
         while True:
             subset_count = 2 ** len(self.__selected)
             feature_count = Xbin_prune.shape[1]
+
             total = np.zeros((subset_count, class_count, feature_count), dtype=int)
             y_t = np.zeros((subset_count, class_count), dtype=int)
-
-            print(total)
-            print(y_t)
             for i in range(sample_count):
                 total[subset_index[i]][y_idx[i]] += Xbin_prune[i]
                 y_t[subset_index[i]][y_idx[i]] += 1
