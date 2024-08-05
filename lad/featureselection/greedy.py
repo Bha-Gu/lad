@@ -117,7 +117,12 @@ class GreedySetCover:
                 break
             best = np.argmax(final_rank)
 
-            self.__selected.append(best)
+            base_best = best
+            for invalid in invalids:
+                if invalid < base_best:
+                    base_best += 1
+
+            self.__selected.append(base_best)
             if len(self.__selected) == self.__max:
                 break
             self.__selected.sort()
@@ -127,12 +132,9 @@ class GreedySetCover:
                     subset_index[sample] += 2 ** (len(self.__selected) - 1)
 
             rejected = np.where(final_rank == 0)[0]
-            base_best = best
             base_rejected = rejected.copy()
 
             for invalid in invalids:
-                if invalid < base_best:
-                    base_best += 1
                 for i in range(len(rejected)):
                     if invalid < base_rejected[i]:
                         base_rejected[i] += 1
