@@ -71,7 +71,9 @@ class GreedySetCover:
     def fit(self, Xbin, y):
         self.__selected = np.array([[]])
 
-        builder = UnWeightedSetCoveringProblem(np.array([[]]))
+        builder = UnWeightedSetCoveringProblem(
+            np.array([[] for _ in range(Xbin.shape[0])])
+        )
         scp, invalid = builder.fit(Xbin, y)
 
         invalids = []
