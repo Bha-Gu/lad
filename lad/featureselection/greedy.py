@@ -85,6 +85,7 @@ class GreedySetCover:
                 break
             mask = np.ones(Xbin_prune.shape[1], dtype=bool)
             mask[invalid] = False
+            print(mask, invalid)
             mask[effective_selected] = False
             invalid = np.where(mask is False)
             invalid = invalid[0]
