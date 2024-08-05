@@ -149,7 +149,7 @@ class GreedySetCover:
             mask = np.ones(feature_count, dtype=bool)
             mask[rejected] = False
             mask[best] = False
-            print(best, invalids, base_best)
+            print(best, len(invalids), base_best)
             Xbin_prune = Xbin_prune[:, mask]
 
         # builder = UnWeightedSetCoveringProblem(
