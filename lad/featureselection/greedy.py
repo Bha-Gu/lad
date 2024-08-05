@@ -95,7 +95,7 @@ class GreedySetCover:
                 for j in range(len(invalid)):
                     if i < invalid[j]:
                         invalid[j] += 1
-            print(invalids)
+            print(invalids, invalid)
             for i in invalid:
                 if i not in invalids:
                     invalids.append(i)
