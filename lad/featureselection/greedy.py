@@ -89,6 +89,7 @@ class GreedySetCover:
             y_t = np.zeros((subset_count, class_count), dtype=int)
 
             for i in range(sample_count):
+                print(subset_index)
                 total[subset_index[i]][y_idx[i]] += Xbin_prune[i]
                 y_t[subset_index[i]][y_idx[i]] += 1
 
