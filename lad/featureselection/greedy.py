@@ -32,7 +32,7 @@ class UnWeightedSetCoveringProblem:
             b.append(idx)
 
         print(sample_count)
-        print(len(b[0]))
+        print(len(a.shape))
         for i in range(sample_count):
             total[b[i]][y_idx[i]] += Xbin[i]
             y_t[b[i]][y_idx[i]] += 1
