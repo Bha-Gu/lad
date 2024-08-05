@@ -24,12 +24,15 @@ class UnWeightedSetCoveringProblem:
         y_idx = []
         for i in y:
             y_idx.append(np.where(labels == i)[0][0])
+
         for i in a:
             idx = 0
             for jdx, j in enumerate(i):
                 idx += (jdx + 1) * j
             b.append(idx)
 
+        print(sample_count)
+        print(len(b[0]))
         for i in range(sample_count):
             total[b[i]][y_idx[i]] += Xbin[i]
             y_t[b[i]][y_idx[i]] += 1
