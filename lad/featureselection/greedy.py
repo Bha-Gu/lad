@@ -6,7 +6,7 @@ import numpy as np
 class UnWeightedSetCoveringProblem:
     """Set covering problem builder"""
 
-    def __init__(self, selected=[]):
+    def __init__(self, selected=np.array([[]])):
         self.__scp = []
         self.__selected = selected
 
@@ -66,9 +66,9 @@ class GreedySetCover:
         return np.array(self.__selected)
 
     def fit(self, Xbin, y):
-        self.__selected.clear()
+        self.__selected = np.array([[]])
 
-        builder = UnWeightedSetCoveringProblem(self.__selected)
+        builder = UnWeightedSetCoveringProblem(np.array([[]]))
         scp, invalid = builder.fit(Xbin, y)
 
         invalids = []
