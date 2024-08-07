@@ -67,14 +67,11 @@ class MaxPatterns:
         labels_weights = {}
 
         for sample in np.unique(Xbin, axis=0):
-            print("Instance: ", sample)
             features = list(np.arange(sample.shape[0]))
-            print("Attributes: ", features)
             # Stats
             repet, _, purity, label, discrepancy = self.__get_stats(
                 Xbin, y, sample, features
             )
-            print("Stats: ", repet, "_", purity, label, discrepancy)
 
             # Choosing rule's attributes
             while len(features) > 1:
@@ -135,13 +132,12 @@ class MaxPatterns:
         # Reweighting
         for i, r in enumerate(self.__rules):
             r["weight"] = rules_weights[i] / labels_weights[r["label"]]
-        print(self.__rules)
         self.__adjust()
 
     def __adjust(self):
         for r in self.__rules:
             conditions = {}
-            print(self.__selected[r["attributes"]])
+            print(self.__selected)
             # cutpoints = [self.__cutpoints[i] for i in self.__selected[r["attributes"]]]
             cutpoints = []
             for i in self.__selected[r["attributes"]]:
