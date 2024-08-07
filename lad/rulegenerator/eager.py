@@ -2,7 +2,6 @@ import numpy as np
 
 
 class MaxPatterns:
-
     def __init__(self, binarizer, selector, purity):
         self.__min_purity = purity
         self.__rules = []
@@ -14,7 +13,6 @@ class MaxPatterns:
         weights = {}
 
         for r in self.__rules:
-
             label = r["label"]
             weight = r["weight"]
 
@@ -141,6 +139,7 @@ class MaxPatterns:
     def __adjust(self):
         for r in self.__rules:
             conditions = {}
+            print(self.__cutpoints)
             cutpoints = [self.__cutpoints[i] for i in self.__selected[r["attributes"]]]
 
             for i, (att, value) in enumerate(cutpoints):
@@ -166,8 +165,8 @@ class MaxPatterns:
 
         self.__rules.sort(key=lambda x: x["label"])
 
-    def __get_stats(self, Xbin, y, instance, attributes):
-        covered = np.where((Xbin[:, attributes] == instance[attributes]).all(axis=1))
+    def __get_stats(self, Xbin, y, sample, features):
+        covered = np.where((Xbin[:, features] == sample[features]).all(axis=1))
         uncovered = np.setdiff1d(np.arange(Xbin.shape[0]), covered[0])
 
         unique, counts = np.unique(y[covered], return_counts=True)
@@ -179,11 +178,11 @@ class MaxPatterns:
         uncovered_other = uncovered[y[uncovered] != label]
 
         distance_class = np.sum(
-            np.bitwise_xor(Xbin[uncovered_class][:, attributes], instance[attributes])
+            np.bitwise_xor(Xbin[uncovered_class][:, features], sample[features])
         )
 
         distance_other = np.sum(
-            np.bitwise_xor(Xbin[uncovered_other][:, attributes], instance[attributes])
+            np.bitwise_xor(Xbin[uncovered_other][:, features], sample[features])
         )
 
         discrepancy = (
@@ -193,7 +192,7 @@ class MaxPatterns:
             / max(1.0, len(uncovered_other))
         )
 
-        return len(covered), counts[argmax], purity, label, discrepancy
+        return len(covered[0]), counts[argmax], purity, label, discrepancy
 
     def __str__(self):
         s = f"MaxPatterns Set of Rules [{len(self.__rules)}]:\n"
