@@ -135,7 +135,7 @@ class MaxPatterns:
         # Reweighting
         for i, r in enumerate(self.__rules):
             r["weight"] = rules_weights[i] / labels_weights[r["label"]]
-        print(r)
+        print(self.__rules)
         self.__adjust()
 
     def __adjust(self):
