@@ -66,29 +66,29 @@ class MaxPatterns:
         rules_weights = []
         labels_weights = {}
 
-        for instance in np.unique(Xbin, axis=0):
-            print("Instance: ", instance)
-            attributes = list(np.arange(instance.shape[0]))
-            print("Attributes: ", attributes)
+        for sample in np.unique(Xbin, axis=0):
+            print("Instance: ", sample)
+            features = list(np.arange(sample.shape[0]))
+            print("Attributes: ", features)
             # Stats
             repet, _, purity, label, discrepancy = self.__get_stats(
-                Xbin, y, instance, attributes
+                Xbin, y, sample, features
             )
             print("Stats: ", repet, "_", purity, label, discrepancy)
 
             # Choosing rule's attributes
-            while len(attributes) > 1:
-                best = None  # Actually, the worst
-                __attributes = attributes.copy()
+            while len(features) > 1:
+                worst = None  # Actually, the worst
+                tmp_attributes = features.copy()
 
                 # Find the best attribute to be removed
-                for att in attributes:
+                for feature in features:
                     # Candidate
-                    __attributes.remove(att)
+                    tmp_attributes.remove(feature)
 
                     # Stats
                     _, _, __purity, _, __discrepancy = self.__get_stats(
-                        Xbin, y, instance, __attributes
+                        Xbin, y, sample, tmp_attributes
                     )
 
                     # Testing candidate
@@ -96,29 +96,29 @@ class MaxPatterns:
                         if __purity > purity or (
                             __purity == purity and __discrepancy < discrepancy
                         ):
-                            best = att
+                            worst = feature
                             purity = __purity
                             discrepancy = __discrepancy
 
                     #
-                    __attributes.append(att)
+                    tmp_attributes.append(feature)
 
-                if best is None:
+                if worst is None:
                     break
 
                 # Update rule
-                attributes.remove(best)
+                features.remove(worst)
 
                 # Turn's stats
                 _, _, purity, label, discrepancy = self.__get_stats(
-                    Xbin, y, instance, attributes
+                    Xbin, y, sample, features
                 )
 
             # Forming rule object
             r = {
                 "label": label,
-                "attributes": attributes.copy(),
-                "conditions": list(instance[attributes]),
+                "attributes": features.copy(),
+                "conditions": list(sample[features]),
                 "purity": purity,
             }
 
@@ -135,7 +135,7 @@ class MaxPatterns:
         # Reweighting
         for i, r in enumerate(self.__rules):
             r["weight"] = rules_weights[i] / labels_weights[r["label"]]
-
+        print(r)
         self.__adjust()
 
     def __adjust(self):
