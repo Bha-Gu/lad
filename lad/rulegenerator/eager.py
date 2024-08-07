@@ -141,8 +141,14 @@ class MaxPatterns:
     def __adjust(self):
         for r in self.__rules:
             conditions = {}
-            print(self.__cutpoints)
-            cutpoints = [self.__cutpoints[i] for i in self.__selected[r["attributes"]]]
+            # print(self.__cutpoints)
+            # cutpoints = [self.__cutpoints[i] for i in self.__selected[r["attributes"]]]
+            cutpoints = []
+            for i in self.__selected[r["attributes"]]:
+                print(i)
+                a = self.__cutpoints[i]
+                print(a)
+                cutpoints.append(a)
 
             for i, (att, value) in enumerate(cutpoints):
                 condition = conditions.get(att, {})
