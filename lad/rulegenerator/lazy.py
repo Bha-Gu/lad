@@ -2,7 +2,6 @@ import numpy as np
 
 
 class LazyPatterns:
-
     def __init__(self, binarizer, selector):
         self.__Xbin = None
         self.__y = None

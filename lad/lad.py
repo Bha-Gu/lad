@@ -6,7 +6,6 @@ https://scikit-learn.org/stable/developers/develop.html
 https://sklearn-template.readthedocs.io/en/latest/quick_start.html
 """
 
-
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
 
@@ -49,11 +48,11 @@ class LADClassifier(BaseEstimator, ClassifierMixin):
         values: {eager, lazy}
     """
 
-    def __init__(self, tolerance=0.0, purity=0.95, mode="eager", y_importances=[]):
+    def __init__(self, tolerance=0.0, purity=0.95, mode="eager", max_features=0):
         self.tolerance = tolerance
         self.purity = purity
         self.mode = mode
-        self.yis = y_importances
+        self.max_features = max_features
         self.model = None
 
     def fit(self, X, y):
@@ -65,7 +64,7 @@ class LADClassifier(BaseEstimator, ClassifierMixin):
         Xbin = cpb.fit_transform(X, y)
 
         print("# Feature Selection")
-        gsc = GreedySetCover(self.yis)
+        gsc = GreedySetCover(self.max_features)
         Xbin = gsc.fit_transform(Xbin, y)
 
         print("# Rule building")
