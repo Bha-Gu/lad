@@ -67,12 +67,14 @@ class MaxPatterns:
         labels_weights = {}
 
         for instance in np.unique(Xbin, axis=0):
+            print("Instance: ", instance)
             attributes = list(np.arange(instance.shape[0]))
-
+            print("Attributes: ", attributes)
             # Stats
             repet, _, purity, label, discrepancy = self.__get_stats(
                 Xbin, y, instance, attributes
             )
+            print("Stats: ", repet, "_", purity, label, discrepancy)
 
             # Choosing rule's attributes
             while len(attributes) > 1:
