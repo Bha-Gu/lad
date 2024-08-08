@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-from collections import defaultdict
-
 import numpy as np
 
 
@@ -29,7 +27,6 @@ class CutpointBinarizer:
 
             if np.issubdtype(values_type, np.number):
                 sorted_values = sorted(values)
-                print("values", sorted_values)
                 delta = 0
                 prev_value = sorted_values[0]
                 for value in sorted_values[1:]:
@@ -76,6 +73,7 @@ class CutpointBinarizer:
     def transform(self, X):
         Xbin = np.empty((X.shape[0], 0), bool)
         X = np.array(X)
+        print(self.__cutpoints)
         for att, (type_data, cutpoints) in enumerate(self.__cutpoints):
             print("transform", att)
             if type_data:

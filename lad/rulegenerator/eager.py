@@ -138,6 +138,7 @@ class MaxPatterns:
         for r in self.__rules:
             conditions = {}
             print(self.__selected)
+            print(self.__cutpoints)
             # cutpoints = [self.__cutpoints[i] for i in self.__selected[r["attributes"]]]
             cutpoints = []
             for i in self.__selected[r["attributes"]]:
