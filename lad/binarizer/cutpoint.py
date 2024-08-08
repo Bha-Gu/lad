@@ -97,7 +97,7 @@ class CutpointBinarizer:
                     row = X.T[att]
                     row = row == value
                     Xbin = np.hstack((Xbin, row))
-
+        print(Xbin.shape)
         return Xbin
 
     def fit_transform(self, X, y):
