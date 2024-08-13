@@ -48,9 +48,8 @@ class LADClassifier(BaseEstimator, ClassifierMixin):
         values: {eager, lazy}
     """
 
-    def __init__(self, tolerance=0.0, purity=0.95, mode="eager", max_features=0):
+    def __init__(self, tolerance=0.0, mode="eager", max_features=0):
         self.tolerance = tolerance
-        self.purity = purity
         self.mode = mode
         self.max_features = max_features
         self.model = None
@@ -68,7 +67,7 @@ class LADClassifier(BaseEstimator, ClassifierMixin):
         Xbin = gsc.fit_transform(Xbin, y)
 
         print("# Rule building")
-        self.model = MaxPatterns(cpb, gsc, self.purity)
+        self.model = MaxPatterns(cpb, gsc)
 
         if self.mode == "lazy":
             self.model = LazyPatterns(cpb, gsc)
