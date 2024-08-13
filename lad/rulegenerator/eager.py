@@ -145,7 +145,7 @@ class MaxPatterns:
         for lable in unique:
             X_pos = []
             X_neg = []
-            for idx in len(Xbin):
+            for idx in range(len(Xbin)):
                 if lable == y[idx]:
                     X_pos.append(Xbin[idx])
                 else:
