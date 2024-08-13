@@ -289,25 +289,25 @@ class MaxPatterns:
     #     )
     #
     #     return len(covered[0]), counts[argmax], purity, label, discrepancy
+    # #
+    # def __str__(self):
+    #     s = f"MaxPatterns Set of Rules [{len(self.__rules)}]:\n"
     #
-    def __str__(self):
-        s = f"MaxPatterns Set of Rules [{len(self.__rules)}]:\n"
-
-        for r in self.__rules:
-            label = r["label"]
-            # weight = r['weight']
-            conditions = []
-
-            for i, condition in enumerate(r["conditions"]):
-                att = r["attributes"][i]
-                val = r["values"][i]
-
-                if condition:
-                    conditions.append(f"att{att} <= {val:.4}")
-                else:
-                    conditions.append(f"att{att} > {val:.4}")
-
-            # Label -> CONDITION_1 AND CONDITION_2 AND CONDITION_n
-            s += f'{label} \u2192 {" AND ".join(conditions)}\n'
-
-        return s
+    #     for r in self.__rules:
+    #         label = r["label"]
+    #         # weight = r['weight']
+    #         conditions = []
+    #
+    #         for i, condition in enumerate(r["conditions"]):
+    #             att = r["attributes"][i]
+    #             val = r["values"][i]
+    #
+    #             if condition:
+    #                 conditions.append(f"att{att} <= {val:.4}")
+    #             else:
+    #                 conditions.append(f"att{att} > {val:.4}")
+    #
+    #         # Label -> CONDITION_1 AND CONDITION_2 AND CONDITION_n
+    #         s += f'{label} \u2192 {" AND ".join(conditions)}\n'
+    #
+    #     return s
