@@ -69,6 +69,7 @@ class MaxPatterns:
         prev_degree_non_prime_patterns = set()
         for d in range(1, self.__max_terms):
             curr_degree_non_prime_patterns = set()
+
             for curr_base_patterns in prev_degree_non_prime_patterns:
                 largets_idx_of_terms_in_curr_patterns = None
                 for idx, value in enumerate(curr_base_patterns):
@@ -116,6 +117,7 @@ class MaxPatterns:
 
                             if hd >= self.__fp_tolerance:
                                 prime_patterns.union(set([curr_base_patterns]))
+                                print(curr_base_patterns)
                             else:
                                 curr_degree_non_prime_patterns.union(
                                     set([curr_base_patterns])
