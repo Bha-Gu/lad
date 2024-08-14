@@ -67,7 +67,7 @@ class MaxPatterns:
 
     def __base_fit(self, X_pos, X_neg):
         feature_count = len(X_pos[0])
-        prime_patterns = set()
+        prime_patterns = set([0])
         prev_degree_non_prime_patterns = set([0])
         for d in range(1, self.__max_terms):
             curr_degree_non_prime_patterns = set()
