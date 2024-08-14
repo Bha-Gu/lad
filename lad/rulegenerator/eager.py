@@ -113,22 +113,23 @@ class MaxPatterns:
                             ):
                                 pos_count_prime += 1
                         if self.__fn_tolerance <= 2 * pos_count_prime / len(X_pos):
+                            print("fn tolerant")
                             pos_count = 0
                             neg_count = 0
-                            for sample in X_pos:
+                            for sample_pos in X_pos:
                                 if self.__match_terms(
-                                    sample,
+                                    sample_pos,
                                     self.__gen_pattern(
-                                        curr_base_patterns, feature_count
+                                        possible_next_pattern, feature_count
                                     ),
                                 ):
                                     pos_count += 1
 
-                            for smaple in X_neg:
+                            for sample_neg in X_neg:
                                 if self.__match_terms(
-                                    sample,
+                                    sample_neg,
                                     self.__gen_pattern(
-                                        curr_base_patterns, feature_count
+                                        possible_next_pattern, feature_count
                                     ),
                                 ):
                                     neg_count += 1
@@ -139,11 +140,11 @@ class MaxPatterns:
                             hd = pos_pct / (pos_pct + neg_pct)
 
                             if hd >= self.__fp_tolerance:
-                                prime_patterns.union(set([curr_base_patterns]))
-                                print(curr_base_patterns)
+                                prime_patterns.union(set([possible_next_pattern]))
+                                print(possible_next_pattern)
                             else:
                                 curr_degree_non_prime_patterns.union(
-                                    set([curr_base_patterns])
+                                    set([possible_next_pattern])
                                 )
             prev_degree_non_prime_patterns = curr_degree_non_prime_patterns
         return prime_patterns
