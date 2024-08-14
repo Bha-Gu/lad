@@ -1,4 +1,4 @@
-from typing import List, Optional, Set
+from typing import List, Optional
 
 import numpy as np
 
@@ -199,7 +199,7 @@ class MaxPatterns:
             self.__rules.append(patterns)
         print(self.__rules)
         for i in self.__rules:
-            for j in i:
+            for j in i.keys():
                 print(j, end="")
             print("new", i)
         # rules_weights = []
