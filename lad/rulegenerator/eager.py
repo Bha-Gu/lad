@@ -136,8 +136,10 @@ class MaxPatterns:
 
                             pos_pct = pos_count / len(X_pos)
                             neg_pct = neg_count / len(X_neg)
-
-                            hd = pos_pct / (pos_pct + neg_pct)
+                            base = pos_pct + neg_pct
+                            hd = 0.0
+                            if base > 0:
+                                hd = pos_pct / base
 
                             if hd >= self.__fp_tolerance:
                                 prime_patterns.union(set([possible_next_pattern]))
