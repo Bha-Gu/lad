@@ -68,33 +68,37 @@ class MaxPatterns:
     def __base_fit(self, X_pos, X_neg):
         feature_count = len(X_pos[0])
         prime_patterns = set()
-        prev_degree_non_prime_patterns: Set[List[Optional[bool]]] = set(
-            [[None for _ in range(feature_count)]]
-        )
+        prev_degree_non_prime_patterns = set([0])
         for d in range(1, self.__max_terms):
             curr_degree_non_prime_patterns = set()
             print("D: ", d)
             for curr_base_patterns in prev_degree_non_prime_patterns:
                 print("Pattern: ", curr_base_patterns)
-                largets_idx_of_terms_in_curr_patterns = None
-                for idx, value in enumerate(curr_base_patterns):
-                    if value is not None:
-                        largets_idx_of_terms_in_curr_patterns = idx
+                largets_idx_of_terms_in_curr_patterns = -1
+                tmp_value = curr_base_patterns
+                while tmp_value > 0:
+                    tmp_value = tmp_value // 4
+                    largets_idx_of_terms_in_curr_patterns += 1
                 start_of_range = 0
-                if largets_idx_of_terms_in_curr_patterns is not None:
+                if largets_idx_of_terms_in_curr_patterns != -1:
                     start_of_range = largets_idx_of_terms_in_curr_patterns
                 for i in range(start_of_range, feature_count):
                     print("I, ", i)
-                    for possible_term in [True, False]:
+                    for possible_term in [3, 2]:
                         print("Possible, ", possible_term)
                         should_break = False
-                        possible_next_pattern = curr_base_patterns.copy()
-                        possible_next_pattern[i] = possible_term
-                        for idx, term in enumerate(possible_next_pattern):
-                            if term is None:
+                        possible_next_pattern = curr_base_patterns
+                        possible_next_pattern += possible_term * (4**i)
+                        tmp_possible = possible_next_pattern
+                        idx = -1
+                        while tmp_possible > 0:
+                            idx += 1
+                            value = tmp_possible % 4
+                            tmp_possible = tmp_possible // 4
+                            if value == 0:
                                 continue
                             test_pattern = possible_next_pattern.copy()
-                            test_pattern[idx] = None
+                            test_pattern -= value * (4**idx)
                             if not prev_degree_non_prime_patterns.__contains__(
                                 test_pattern
                             ):
@@ -105,17 +109,32 @@ class MaxPatterns:
                             continue
                         pos_count_prime = 0
                         for sample_t in X_pos:
-                            if self.__match_terms(sample_t, possible_next_pattern):
+                            if self.__match_terms(
+                                sample_t,
+                                self.__gen_pattern(
+                                    possible_next_pattern, feature_count
+                                ),
+                            ):
                                 pos_count_prime += 1
                         if self.__fn_tolerance <= 2 * pos_count_prime / len(X_pos):
                             pos_count = 0
                             neg_count = 0
                             for sample in X_pos:
-                                if self.__match_terms(sample, curr_base_patterns):
+                                if self.__match_terms(
+                                    sample,
+                                    self.__gen_pattern(
+                                        curr_base_patterns, feature_count
+                                    ),
+                                ):
                                     pos_count += 1
 
                             for smaple in X_neg:
-                                if self.__match_terms(sample, curr_base_patterns):
+                                if self.__match_terms(
+                                    sample,
+                                    self.__gen_pattern(
+                                        curr_base_patterns, feature_count
+                                    ),
+                                ):
                                     neg_count += 1
 
                             pos_pct = pos_count / len(X_pos)
@@ -131,6 +150,23 @@ class MaxPatterns:
                                     set([curr_base_patterns])
                                 )
             prev_degree_non_prime_patterns = curr_degree_non_prime_patterns
+        return prime_patterns
+
+    def __gen_pattern(self, a, n):
+        out: List[Optional[bool]] = [None for _ in range(n)]
+        tmp = a
+        idx = 0
+        while tmp > 0:
+            value = tmp % 4
+            tmp = tmp // 4
+            val = None
+            if value == 4:
+                val = True
+            if value == 3:
+                val = False
+            out[idx] = val
+            idx += 1
+        return out
 
     def __match_terms(self, a, b):
         out = True
