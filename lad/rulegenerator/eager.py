@@ -85,6 +85,7 @@ class MaxPatterns:
                         should_break = False
                         possible_next_pattern = curr_base_patterns
                         possible_next_pattern += possible_term * (4**i)
+                        print(possible_next_pattern)
                         tmp_possible = possible_next_pattern
                         idx = -1
                         while tmp_possible > 0:
