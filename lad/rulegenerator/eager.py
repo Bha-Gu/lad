@@ -67,7 +67,7 @@ class MaxPatterns:
 
     def __base_fit(self, X_pos, X_neg):
         feature_count = len(X_pos[0])
-        prime_patterns = set([0])
+        prime_patterns = set()
         prev_degree_non_prime_patterns = set([0])
         for d in range(1, self.__max_terms):
             curr_degree_non_prime_patterns = set()
@@ -142,7 +142,6 @@ class MaxPatterns:
 
                             if hd >= self.__fp_tolerance:
                                 prime_patterns.add(possible_next_pattern)
-                                print(prime_patterns)
                             else:
                                 curr_degree_non_prime_patterns.add(
                                     possible_next_pattern
