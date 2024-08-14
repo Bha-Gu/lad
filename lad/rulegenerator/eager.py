@@ -1,3 +1,5 @@
+from typing import List, Optional, Set
+
 import numpy as np
 
 
@@ -66,7 +68,9 @@ class MaxPatterns:
     def __base_fit(self, X_pos, X_neg):
         feature_count = len(X_pos[0])
         prime_patterns = set()
-        prev_degree_non_prime_patterns = set()
+        prev_degree_non_prime_patterns: Set[List[Optional[bool]]] = set(
+            [[None for _ in range(feature_count)]]
+        )
         for d in range(1, self.__max_terms):
             curr_degree_non_prime_patterns = set()
             print("D: ", d)
