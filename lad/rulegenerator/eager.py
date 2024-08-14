@@ -97,7 +97,7 @@ class MaxPatterns:
                             tmp_possible = tmp_possible // 4
                             if value == 0:
                                 continue
-                            test_pattern = possible_next_pattern.copy()
+                            test_pattern = possible_next_pattern
                             test_pattern -= value * (4**idx)
                             if not prev_degree_non_prime_patterns.__contains__(
                                 test_pattern
