@@ -71,9 +71,7 @@ class MaxPatterns:
         prev_degree_non_prime_patterns = set([0])
         for d in range(1, self.__max_terms):
             curr_degree_non_prime_patterns = set()
-            print("D: ", d)
             for curr_base_patterns in prev_degree_non_prime_patterns:
-                print("Pattern: ", curr_base_patterns)
                 largets_idx_of_terms_in_curr_patterns = -1
                 tmp_value = curr_base_patterns
                 while tmp_value > 0:
@@ -83,9 +81,7 @@ class MaxPatterns:
                 if largets_idx_of_terms_in_curr_patterns != -1:
                     start_of_range = largets_idx_of_terms_in_curr_patterns
                 for i in range(start_of_range, feature_count):
-                    print("I, ", i)
                     for possible_term in [3, 2]:
-                        print("Possible, ", possible_term)
                         should_break = False
                         possible_next_pattern = curr_base_patterns
                         possible_next_pattern += possible_term * (4**i)
@@ -105,7 +101,6 @@ class MaxPatterns:
                                 should_break = True
                                 break
                         if should_break:
-                            print("Continueing loop")
                             continue
                         pos_count_prime = 0
                         for sample_t in X_pos:
@@ -198,9 +193,11 @@ class MaxPatterns:
                     X_neg.append(Xbin[idx])
 
             patterns = self.__base_fit(X_pos, X_neg)
-            print(patterns)
             self.__rules.append(patterns)
         print(self.__rules)
+        for i in self.__rules:
+            for j in i:
+                print(j)
         # rules_weights = []
         # labels_weights = {}
         #
