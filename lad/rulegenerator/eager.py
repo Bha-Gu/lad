@@ -141,11 +141,11 @@ class MaxPatterns:
                                 hd = pos_pct / base
 
                             if hd >= self.__fp_tolerance:
-                                prime_patterns.union(set([possible_next_pattern]))
+                                prime_patterns.add(possible_next_pattern)
                                 print(prime_patterns)
                             else:
-                                curr_degree_non_prime_patterns.union(
-                                    set([possible_next_pattern])
+                                curr_degree_non_prime_patterns.add(
+                                    possible_next_pattern
                                 )
             prev_degree_non_prime_patterns = curr_degree_non_prime_patterns
         return prime_patterns
