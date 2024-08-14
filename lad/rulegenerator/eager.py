@@ -198,6 +198,7 @@ class MaxPatterns:
                     X_neg.append(Xbin[idx])
 
             patterns = self.__base_fit(X_pos, X_neg)
+            print(patterns)
             self.__rules.append(patterns)
         print(self.__rules)
         # rules_weights = []
