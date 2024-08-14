@@ -142,7 +142,7 @@ class MaxPatterns:
 
                             if hd >= self.__fp_tolerance:
                                 prime_patterns.union(set([possible_next_pattern]))
-                                print(possible_next_pattern)
+                                print(prime_patterns)
                             else:
                                 curr_degree_non_prime_patterns.union(
                                     set([possible_next_pattern])
@@ -199,7 +199,7 @@ class MaxPatterns:
             self.__rules.append(patterns)
         print(self.__rules)
         for i in self.__rules:
-            for j in i.keys():
+            for j in i:
                 print(j, end="")
             print("new", i)
         # rules_weights = []
