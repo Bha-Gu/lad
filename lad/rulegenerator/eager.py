@@ -112,7 +112,6 @@ class MaxPatterns:
                             ):
                                 pos_count_prime += 1
                         if self.__fn_tolerance <= 2 * pos_count_prime / len(X_pos):
-                            print("fn tolerant")
                             pos_count = 0
                             neg_count = 0
                             for sample_pos in X_pos:
