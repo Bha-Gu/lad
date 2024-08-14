@@ -198,8 +198,8 @@ class MaxPatterns:
         print(self.__rules)
         for i in self.__rules:
             for j in i:
-                print(j, end="")
-            print("new", i)
+                print(f"{j:b}")
+            print()
         # rules_weights = []
         # labels_weights = {}
         #
