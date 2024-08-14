@@ -171,8 +171,8 @@ class MaxPatterns:
     def __match_terms(self, a, b):
         out = True
         for i in range(len(a)):
-            if b is not None:
-                if a == b:
+            if b[i] is not None:
+                if a[i] == b[i]:
                     pass
                 else:
                     out = False
