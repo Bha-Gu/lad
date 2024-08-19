@@ -70,8 +70,10 @@ class MaxPatterns:
         prime_patterns = set()
         prev_degree_non_prime_patterns = set([0])
         for d in range(1, self.__max_terms):
+            print("Loop1 Index: ", d)
             curr_degree_non_prime_patterns = set()
             for curr_base_patterns in prev_degree_non_prime_patterns:
+                print("  Loop2 CBP: ", curr_base_patterns)
                 largets_idx_of_terms_in_curr_patterns = -1
                 tmp_value = curr_base_patterns
                 while tmp_value > 0:
@@ -81,7 +83,9 @@ class MaxPatterns:
                 if largets_idx_of_terms_in_curr_patterns != -1:
                     start_of_range = largets_idx_of_terms_in_curr_patterns
                 for i in range(start_of_range, feature_count):
+                    print("    Loop3 Index: ", i)
                     for possible_term in [3, 2]:
+                        print("      Loop4 Term", possible_term)
                         should_break = False
                         possible_next_pattern = curr_base_patterns
                         possible_next_pattern += possible_term * (4**i)
@@ -101,6 +105,7 @@ class MaxPatterns:
                                 should_break = True
                                 break
                         if should_break:
+                            print("      Loop4 Continue")
                             continue
                         pos_count_prime = 0
                         for sample_t in X_pos:
@@ -112,6 +117,7 @@ class MaxPatterns:
                             ):
                                 pos_count_prime += 1
                         if self.__fn_tolerance <= 2 * pos_count_prime / len(X_pos):
+                            print("        Cond1 Pass")
                             pos_count = 0
                             neg_count = 0
                             for sample_pos in X_pos:
@@ -136,12 +142,14 @@ class MaxPatterns:
                             neg_pct = neg_count / len(X_neg)
                             base = pos_pct + neg_pct
                             hd = 0.0
-                            if base > 0:
+                            if base > 0.0:
                                 hd = pos_pct / base
 
                             if hd >= self.__fp_tolerance:
+                                print("          Cond2 Pass")
                                 prime_patterns.add(possible_next_pattern)
                             else:
+                                print("          Cond2 Fail")
                                 curr_degree_non_prime_patterns.add(
                                     possible_next_pattern
                                 )
