@@ -69,6 +69,9 @@ class MaxPatterns:
         feature_count = len(X_pos[0])
         prime_patterns = set()
         prev_degree_non_prime_patterns = set([0])
+        max = self.__max_terms
+        if max > feature_count or max == 0.0:
+            max = feature_count
         for d in range(1, self.__max_terms):
             print("Loop1 Index: ", d)
             curr_degree_non_prime_patterns = set()
@@ -88,7 +91,7 @@ class MaxPatterns:
                         print("      Loop4 Term", possible_term)
                         should_break = False
                         possible_next_pattern = curr_base_patterns
-                        possible_next_pattern += possible_term * (4**i)
+                        possible_next_pattern += possible_term * (4 ** (max - i - 1))
                         tmp_possible = possible_next_pattern
                         idx = -1
                         while tmp_possible > 0:
