@@ -200,7 +200,7 @@ class MaxPatterns:
         self.__rules.clear()
         self.__labels = unique
         self.__most_frequent_label = unique[np.argmax(counts)]
-
+        num_zeros = 2 * len(Xbin[0])
         # #
         for lable in unique:
             X_pos = []
@@ -216,7 +216,7 @@ class MaxPatterns:
         print(self.__rules)
         for i in self.__rules:
             for j in i:
-                print(f"{j:b}")
+                print(f"{{:0{num_zeros}b}}".format(j))
             print()
         # rules_weights = []
         # labels_weights = {}
