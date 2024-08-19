@@ -177,6 +177,7 @@ class MaxPatterns:
                 val = False
             out[idx] = val
             idx += 1
+        print(a, out)
         return out
 
     def __match_terms(self, a, b):
