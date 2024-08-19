@@ -146,10 +146,10 @@ class MaxPatterns:
                                 hd = pos_pct / base
 
                             if hd >= self.__fp_tolerance:
-                                print("          Cond2 Pass")
+                                print("          Cond2 Pass: ", hd)
                                 prime_patterns.add(possible_next_pattern)
                             else:
-                                print("          Cond2 Fail")
+                                print("          Cond2 Fail: ", hd)
                                 curr_degree_non_prime_patterns.add(
                                     possible_next_pattern
                                 )
