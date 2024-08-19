@@ -170,9 +170,9 @@ class MaxPatterns:
             value = tmp % 4
             tmp = tmp // 4
             val = None
-            if value == 4:
-                val = True
             if value == 3:
+                val = True
+            if value == 2:
                 val = False
             out[idx] = val
             idx += 1
