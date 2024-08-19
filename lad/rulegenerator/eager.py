@@ -73,7 +73,9 @@ class MaxPatterns:
         if max > feature_count or max == 0.0:
             max = feature_count
         for d in range(1, self.__max_terms):
-            # print("Loop1 Index: ", d)
+            print("Loop1 Index: ", d)
+            if len(X_pos) == 0:
+                break
             curr_degree_non_prime_patterns = set()
             for curr_base_patterns in prev_degree_non_prime_patterns:
                 # print("  Loop2 CBP: ", curr_base_patterns)
@@ -125,9 +127,7 @@ class MaxPatterns:
                                 ),
                             ):
                                 pos_count_prime += 1
-                        if self.__fn_tolerance <= 2 * pos_count_prime / (
-                            len(X_pos) + 1
-                        ):
+                        if self.__fn_tolerance <= 2 * pos_count_prime / len(X_pos):
                             # print("        Cond1 Pass: ", possible_next_pattern)
                             pos_count = 0
                             neg_count = 0
@@ -222,6 +222,7 @@ class MaxPatterns:
         num_zeros = 2 * len(Xbin[0])
         # #
         for lable in unique:
+            print(lable)
             X_pos = []
             X_neg = []
             for idx in range(len(Xbin)):
@@ -232,7 +233,7 @@ class MaxPatterns:
 
             patterns = self.__base_fit(np.array(X_pos), np.array(X_neg))
             self.__rules.append(patterns)
-        print(self.__rules)
+        # print(self.__rules)
         for i in self.__rules:
             for j in i:
                 print(f"{{:0{num_zeros}b}}".format(j))
