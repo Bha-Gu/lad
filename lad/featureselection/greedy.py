@@ -6,6 +6,7 @@ class GreedySetCover:
 
     def __init__(self, max_features=0):
         self.__selected = []
+        # self.__ranking = []
         self.__scp = None
         self.__max = max_features
 
@@ -14,6 +15,7 @@ class GreedySetCover:
 
     def fit(self, Xbin, y):
         self.__selected = []
+        # self.__ranking = []
 
         Xbin_prune = Xbin.copy()
         labels = np.unique(y)
@@ -66,9 +68,10 @@ class GreedySetCover:
                     base_best += 1
 
             self.__selected.append(base_best)
+            # self.__ranking.append(final_rank[best])
             if len(self.__selected) == self.__max:
                 break
-            self.__selected.sort()
+            # self.__selected.sort()
 
             for sample in range(sample_count):
                 if Xbin_prune[sample, best]:

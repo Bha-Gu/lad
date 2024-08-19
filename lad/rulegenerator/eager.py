@@ -147,8 +147,8 @@ class MaxPatterns:
                                     neg_count += 1
 
                             # print(pos_count, neg_count)
-                            pos_pct = pos_count / len(X_pos)
-                            neg_pct = neg_count / len(X_neg)
+                            pos_pct = pos_count
+                            neg_pct = neg_count
                             base = pos_pct + neg_pct
                             hd = 0.0
                             if base > 0.0:
@@ -157,6 +157,24 @@ class MaxPatterns:
                             if hd >= self.__fp_tolerance:
                                 # print("          Cond2 Pass: ", hd)
                                 prime_patterns.add(possible_next_pattern)
+                                pos_mask = []
+                                for sample_pos in X_pos:
+                                    if self.__match_terms(
+                                        sample_pos, possible_next_pattern
+                                    ):
+                                        pos_mask.append(False)
+                                    else:
+                                        pos_mask.append(True)
+                                neg_mask = []
+                                X_pos = X_pos[pos_mask]
+                                for sample_neg in X_neg:
+                                    if self.__match_terms(
+                                        sample_neg, possible_next_pattern
+                                    ):
+                                        neg_mask.append(False)
+                                    else:
+                                        neg_mask.append(True)
+                                X_neg = X_neg[neg_mask]
                             else:
                                 # print("          Cond2 Fail: ", hd)
                                 curr_degree_non_prime_patterns.add(
