@@ -157,20 +157,19 @@ class MaxPatterns:
                             if hd >= self.__fp_tolerance:
                                 # print("          Cond2 Pass: ", hd)
                                 prime_patterns.add(possible_next_pattern)
+                                pattern = self.__gen_pattern(
+                                    possible_next_pattern, feature_count
+                                )
                                 pos_mask = []
                                 for sample_pos in X_pos:
-                                    if self.__match_terms(
-                                        sample_pos, possible_next_pattern
-                                    ):
+                                    if self.__match_terms(sample_pos, pattern):
                                         pos_mask.append(False)
                                     else:
                                         pos_mask.append(True)
                                 neg_mask = []
                                 X_pos = X_pos[pos_mask]
                                 for sample_neg in X_neg:
-                                    if self.__match_terms(
-                                        sample_neg, possible_next_pattern
-                                    ):
+                                    if self.__match_terms(sample_neg, pattern):
                                         neg_mask.append(False)
                                     else:
                                         neg_mask.append(True)
