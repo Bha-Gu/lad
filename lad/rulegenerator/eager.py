@@ -91,7 +91,7 @@ class MaxPatterns:
                         # print("      Loop4 Term", possible_term)
                         should_break = False
                         possible_next_pattern = curr_base_patterns
-                        print(possible_next_pattern)
+                        # print(possible_next_pattern)
                         possible_next_pattern += possible_term * (
                             4 ** (feature_count - i - 1)
                         )
