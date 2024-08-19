@@ -228,7 +228,7 @@ class MaxPatterns:
                 else:
                     X_neg.append(Xbin[idx])
 
-            patterns = self.__base_fit(X_pos, X_neg)
+            patterns = self.__base_fit(np.array(X_pos), np.array(X_neg))
             self.__rules.append(patterns)
         print(self.__rules)
         for i in self.__rules:
