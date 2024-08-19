@@ -78,6 +78,8 @@ class MaxPatterns:
                 break
             curr_degree_non_prime_patterns = set()
             for curr_base_patterns in prev_degree_non_prime_patterns:
+                if len(X_pos) == 0:
+                    break
                 # print("  Loop2 CBP: ", curr_base_patterns)
                 largets_idx_of_terms_in_curr_patterns = -1
                 tmp_value = curr_base_patterns
@@ -90,6 +92,8 @@ class MaxPatterns:
                 for i in range(start_of_range, feature_count):
                     # print("    Loop3 Index: ", i)
                     for possible_term in [3, 2]:
+                        if len(X_pos) == 0:
+                            break
                         # print("      Loop4 Term", possible_term)
                         should_break = False
                         possible_next_pattern = curr_base_patterns
