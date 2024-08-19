@@ -73,10 +73,10 @@ class MaxPatterns:
         if max > feature_count or max == 0.0:
             max = feature_count
         for d in range(1, self.__max_terms):
-            print("Loop1 Index: ", d)
+            # print("Loop1 Index: ", d)
             curr_degree_non_prime_patterns = set()
             for curr_base_patterns in prev_degree_non_prime_patterns:
-                print("  Loop2 CBP: ", curr_base_patterns)
+                # print("  Loop2 CBP: ", curr_base_patterns)
                 largets_idx_of_terms_in_curr_patterns = -1
                 tmp_value = curr_base_patterns
                 while tmp_value > 0:
@@ -86,9 +86,9 @@ class MaxPatterns:
                 if largets_idx_of_terms_in_curr_patterns != -1:
                     start_of_range = largets_idx_of_terms_in_curr_patterns
                 for i in range(start_of_range, feature_count):
-                    print("    Loop3 Index: ", i)
+                    # print("    Loop3 Index: ", i)
                     for possible_term in [3, 2]:
-                        print("      Loop4 Term", possible_term)
+                        # print("      Loop4 Term", possible_term)
                         should_break = False
                         possible_next_pattern = curr_base_patterns
                         print(possible_next_pattern)
@@ -126,7 +126,7 @@ class MaxPatterns:
                             ):
                                 pos_count_prime += 1
                         if self.__fn_tolerance <= 2 * pos_count_prime / len(X_pos):
-                            print("        Cond1 Pass: ", possible_next_pattern)
+                            # print("        Cond1 Pass: ", possible_next_pattern)
                             pos_count = 0
                             neg_count = 0
                             pattern = self.__gen_pattern(
