@@ -126,21 +126,20 @@ class MaxPatterns:
                             print("        Cond1 Pass")
                             pos_count = 0
                             neg_count = 0
+                            pattern = self.__gen_pattern(
+                                possible_next_pattern, feature_count
+                            )
                             for sample_pos in X_pos:
                                 if self.__match_terms(
                                     sample_pos,
-                                    self.__gen_pattern(
-                                        possible_next_pattern, feature_count
-                                    ),
+                                    pattern,
                                 ):
                                     pos_count += 1
 
                             for sample_neg in X_neg:
                                 if self.__match_terms(
                                     sample_neg,
-                                    self.__gen_pattern(
-                                        possible_next_pattern, feature_count
-                                    ),
+                                    pattern,
                                 ):
                                     neg_count += 1
 
