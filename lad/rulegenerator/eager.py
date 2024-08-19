@@ -125,7 +125,9 @@ class MaxPatterns:
                                 ),
                             ):
                                 pos_count_prime += 1
-                        if self.__fn_tolerance <= 2 * pos_count_prime / len(X_pos):
+                        if self.__fn_tolerance <= 2 * pos_count_prime / (
+                            len(X_pos) + 1
+                        ):
                             # print("        Cond1 Pass: ", possible_next_pattern)
                             pos_count = 0
                             neg_count = 0
