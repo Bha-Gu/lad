@@ -144,6 +144,7 @@ class MaxPatterns:
                                 ):
                                     neg_count += 1
 
+                            print(pos_count, neg_count)
                             pos_pct = pos_count / len(X_pos)
                             neg_pct = neg_count / len(X_neg)
                             base = pos_pct + neg_pct
