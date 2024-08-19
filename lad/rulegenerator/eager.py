@@ -98,11 +98,12 @@ class MaxPatterns:
                             if value == 0:
                                 continue
                             test_pattern = possible_next_pattern
+                            print(test_pattern)
                             test_pattern -= value * (4**idx)
+                            print(test_pattern)
                             if not prev_degree_non_prime_patterns.__contains__(
                                 test_pattern
                             ):
-                                print(test_pattern)
                                 print(prev_degree_non_prime_patterns)
                                 should_break = True
                                 break
