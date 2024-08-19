@@ -102,6 +102,8 @@ class MaxPatterns:
                             if not prev_degree_non_prime_patterns.__contains__(
                                 test_pattern
                             ):
+                                print(test_pattern)
+                                print(prev_degree_non_prime_patterns)
                                 should_break = True
                                 break
                         if should_break:
