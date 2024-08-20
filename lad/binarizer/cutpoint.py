@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import numpy as np
+import polars as pl
 
 
 class CutpointBinarizer:
@@ -12,26 +13,15 @@ class CutpointBinarizer:
     def get_cutpoints(self):
         return self.__cutpoints
 
-    def fit(self, X, y):
+    def fit(self, X: pl.DataFrame, y: pl.Series):
         self.__cutpoints = []
 
-        feature_count = X.shape[1]
-        y = np.array(y)
-        X = np.array(X)
+        for column in X.get_columns():
+            values_type = column.dtype.is_numeric()
 
-        for feature in range(feature_count):
-            column = X.T[feature]
-            values = np.unique(column)
-
-            values_type = values.dtype
-
-            if np.issubdtype(values_type, np.number):
-                sorted_values = sorted(values)
-                delta = 0
-                prev_value = sorted_values[0]
-                for value in sorted_values[1:]:
-                    delta += value - prev_value
-                    prev_value = value
+            if values_type:
+                sorted_values = column.unique().sort()
+                delta = sorted_values.diff(null_behavior="drop").sum()
 
                 tolerance = delta / len(sorted_values)
 
@@ -45,8 +35,8 @@ class CutpointBinarizer:
                 # Finding transitions
                 for value in sorted_values:
                     # Classes where v appears
-                    indexes = np.where(column == value)
-                    labels = set(y[indexes[0]].flatten())
+                    indexes = (column == value).arg_true()
+                    labels = set(y[indexes].to_list())
                     # Main condition
                     if prev_labels is not None:
                         variation = value - prev_value  # Current - Previous
@@ -66,137 +56,38 @@ class CutpointBinarizer:
                 self.__cutpoints.append((True, cutpoints))
 
             else:
-                self.__cutpoints.append((False, values))
+                self.__cutpoints.append((False, column.to_list()))
 
         return self.__cutpoints
 
-    def transform(self, X):
-        Xbin = np.empty((X.shape[0], 0), bool)
-        X = np.array(X)
+    def transform(self, X: pl.DataFrame) -> pl.DataFrame:
+        Xbin = pl.DataFrame()
+
         print(self.__cutpoints)
-        for att, (type_data, cutpoints) in enumerate(self.__cutpoints):
-            print("transform", att)
+        for column, (type_data, cutpoints) in zip(X.get_columns(), self.__cutpoints):
+            column_name = column.name
+
             if type_data:
                 for cutpoint in cutpoints:
-                    # Binarizing
-                    row = X.T[att]
+                    col = (column <= cutpoint).alias(f"{column_name}<={cutpoint}")
+                    Xbin = Xbin.hstack([col])
 
-                    row = row.reshape(X.shape[0], 1) <= cutpoint
-                    Xbin = np.hstack((Xbin, row))
                 if self.__db:
                     length = len(cutpoints)
                     for i in range(length):
                         for j in range(i + 1, length):
-                            row = X.T[att]
-                            row = (
-                                row.reshape(X.shape[0], 1) > cutpoints[i]
-                            ) <= cutpoints[j]
-                            Xbin = np.hstack((Xbin, row))
+                            col = (
+                                (column > cutpoints[i]) & (column <= cutpoints[j])
+                            ).alias(f"{column_name}->({cutpoints[i]}<->{cutpoints[j]})")
+                            Xbin = Xbin.hstack([col])
             else:
                 for value in cutpoints:
-                    row = X.T[att]
-                    row = row == value
-                    Xbin = np.hstack((Xbin, row))
+                    col = (column == value).alias(f"{column_name}={value}")
+                    Xbin = Xbin.hstack([col])
+
         print(Xbin.shape)
         return Xbin
 
     def fit_transform(self, X, y):
         self.fit(X, y)
         return self.transform(X)
-        # self.__types_number = []
-        # self.__cutpoints = []
-        # self.__mutator = []
-        #
-        # feature_count = X.shape[1]
-        # y = np.array(y)
-        # X = np.array(X)
-        #
-        # for feature in range(feature_count):
-        #     column = X[:, feature]
-        #     prev_label = None  # Previuos label
-        #     prev_value = None  # Previuos xi
-        #
-        #     values = np.unique(column)
-        #
-        #     values_type = values.dtype
-        #
-        #     if np.issubdtype(values_type, np.number):
-        #         self.__types_number.append(True)
-        #         self.__mutator.append([])
-        #     else:
-        #         self.__types_number.append(False)
-        #         self.__mutator.append(values)
-        #         self.__cutpoints.append([])
-        #         continue
-        #
-        #     __cutpoints = []
-        #
-        #     sorted_values = sorted(values)
-        #     print("values", sorted_values)
-        #     delta = 0
-        #     prev = sorted_values[0]
-        #     for v in sorted_values[1:]:
-        #         delta += v - prev
-        #         prev = v
-        #
-        #     __tolerance = delta / len(sorted_values)
-        #
-        #     if len(sorted_values) <= 2:
-        #         __tolerance = 0.0
-        #
-        #     count = 1
-        #     # Finding transitions
-        #     for value in sorted_values:
-        #         # Classes where v appears
-        #         indexes = np.where(column == value)
-        #         label = set(y[indexes[0]].flatten())
-        #         # Main condition
-        #         if prev_label is not None:
-        #             variation = value - prev_value  # Current - Previous
-        #             if variation > __tolerance * self.__tolerance / count:
-        #                 # Testing for transition
-        #                 if (
-        #                     len(prev_label) > 1 or len(label) > 1
-        #                 ) or prev_label != label:
-        #                     count = 1
-        #                     __cutpoints.append(prev_value + variation / 2.0)
-        #                 else:
-        #                     count += 1
-        #             else:
-        #                 count += 1
-        #
-        #         prev_label = label
-        #         prev_value = value
-        #
-        #     self.__cutpoints.append(__cutpoints)
-        #
-        # Xbin = np.empty((X.shape[0], 0), bool)
-        # X = np.array(X)
-        # for att, (cutpoints, type_data, values) in enumerate(
-        #     zip(self.__cutpoints, self.__types_number, self.__mutator)
-        # ):
-        #     print("transform", att)
-        #     if type_data:
-        #         for cutpoint in cutpoints:
-        #             # Binarizing
-        #             row = X.T[att]
-        #
-        #             row = row.reshape(X.shape[0], 1) <= cutpoint
-        #             Xbin = np.hstack((Xbin, row))
-        #         if self.__db:
-        #             length = len(cutpoints)
-        #             for i in range(length):
-        #                 for j in range(i + 1, length):
-        #                     row = X.T[att]
-        #                     row = (
-        #                         row.reshape(X.shape[0], 1) > cutpoints[i]
-        #                     ) <= cutpoints[j]
-        #                     Xbin = np.hstack((Xbin, row))
-        #     else:
-        #         for value in values:
-        #             row = X.T[att]
-        #             print(value)
-        #             row = row == value
-        #             Xbin = np.hstack((Xbin, row))
-        #
-        # return Xbin
