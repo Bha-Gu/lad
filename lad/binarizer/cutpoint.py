@@ -1,14 +1,11 @@
 #!/usr/bin/env python
-import numpy as np
 import polars as pl
 
 
 class CutpointBinarizer:
-    # TODO implement Double Sided Binarisation
-    def __init__(self, tolerance=1.0, double_binarization=True):
+    def __init__(self, tolerance=1.0):
         self.__tolerance = tolerance
         self.__cutpoints = []
-        self.__db = double_binarization
 
     def get_cutpoints(self):
         return self.__cutpoints
@@ -68,18 +65,19 @@ class CutpointBinarizer:
             column_name = column.name
 
             if type_data:
-                for cutpoint in cutpoints:
-                    col = (column <= cutpoint).alias(f"{column_name}<={cutpoint}")
+                col = (column <= cutpoints[0]).alias(f"{column_name}<={cutpoints[0]}")
+                Xbin = Xbin.hstack([col])
+
+                length = len(cutpoints)
+                for i in range(length - 1):
+                    j = i + 1
+                    col = ((column > cutpoints[i]) & (column <= cutpoints[j])).alias(
+                        f"{column_name}->({cutpoints[i]}<->{cutpoints[j]})"
+                    )
                     Xbin = Xbin.hstack([col])
 
-                if self.__db:
-                    length = len(cutpoints)
-                    for i in range(length):
-                        for j in range(i + 1, length):
-                            col = (
-                                (column > cutpoints[i]) & (column <= cutpoints[j])
-                            ).alias(f"{column_name}->({cutpoints[i]}<->{cutpoints[j]})")
-                            Xbin = Xbin.hstack([col])
+                col = (cutpoints[-1] <= column).alias(f"{cutpoints[-1]}<={column_name}")
+                Xbin = Xbin.hstack([col])
             else:
                 for value in cutpoints:
                     col = (column == value).alias(f"{column_name}={value}")
