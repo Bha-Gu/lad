@@ -68,7 +68,7 @@ class MaxPatterns:
 
     def __base_fit(self, X_pos: pl.DataFrame, X_neg: pl.DataFrame, feature_count):
         prime_patterns = set()
-        prev_degree_non_prime_patterns = set([set()])
+        prev_degree_non_prime_patterns = [set()]
         features = X_pos.columns
         max = self.__max_terms
         if max > feature_count or max == 0:
