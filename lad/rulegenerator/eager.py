@@ -1,5 +1,7 @@
 # from typing import List, Optional
 
+import copy
+
 import numpy as np
 import polars as pl
 
@@ -104,7 +106,7 @@ class MaxPatterns:
                         # print(possible_next_pattern)
                         possible_next_pattern.add((possible_term, features[i]))
                         for term in possible_next_pattern:
-                            test_pattern = possible_next_pattern
+                            test_pattern = copy.deepcopy(possible_next_pattern)
                             test_pattern.discard(term)
                             if not prev_degree_non_prime_patterns.__contains__(
                                 test_pattern
