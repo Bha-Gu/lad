@@ -79,7 +79,7 @@ class MaxPatterns:
             print("Loop1 Index: ", d)
             if len(X_pos) == 0:
                 break
-            curr_degree_non_prime_patterns = set()
+            curr_degree_non_prime_patterns = []
             for curr_base_patterns in prev_degree_non_prime_patterns:
                 if len(X_pos) == 0:
                     break
