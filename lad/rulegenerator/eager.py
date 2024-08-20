@@ -1,6 +1,7 @@
-from typing import List, Optional
+# from typing import List, Optional
 
 import numpy as np
+import polars as pl
 
 
 class MaxPatterns:
@@ -65,14 +66,14 @@ class MaxPatterns:
 
         return output
 
-    def __base_fit(self, X_pos, X_neg):
-        feature_count = len(X_pos[0])
+    def __base_fit(self, X_pos: pl.DataFrame, X_neg: pl.DataFrame, feature_count):
         prime_patterns = set()
-        prev_degree_non_prime_patterns = set([0])
+        prev_degree_non_prime_patterns = set([set()])
+        features = X_pos.columns
         max = self.__max_terms
-        if max > feature_count or max == 0.0:
+        if max > feature_count or max == 0:
             max = feature_count
-        for d in range(1, self.__max_terms):
+        for d in range(1, max):
             print("Loop1 Index: ", d)
             if len(X_pos) == 0:
                 break
@@ -82,75 +83,68 @@ class MaxPatterns:
                     break
                 # print("  Loop2 CBP: ", curr_base_patterns)
                 largets_idx_of_terms_in_curr_patterns = -1
-                tmp_value = curr_base_patterns
-                while tmp_value > 0:
-                    tmp_value = tmp_value // 4
-                    largets_idx_of_terms_in_curr_patterns += 1
-                start_of_range = 0
-                if largets_idx_of_terms_in_curr_patterns != -1:
-                    start_of_range = largets_idx_of_terms_in_curr_patterns
+
+                for idx, feature in enumerate(features):
+                    if (True, feature) in curr_base_patterns or (
+                        False,
+                        feature,
+                    ) in curr_base_patterns:
+                        largets_idx_of_terms_in_curr_patterns = idx
+
+                start_of_range = largets_idx_of_terms_in_curr_patterns + 1
+
                 for i in range(start_of_range, feature_count):
                     # print("    Loop3 Index: ", i)
-                    for possible_term in [3, 2]:
+                    for possible_term in [True, False]:
                         if len(X_pos) == 0:
                             break
                         # print("      Loop4 Term", possible_term)
                         should_break = False
                         possible_next_pattern = curr_base_patterns
                         # print(possible_next_pattern)
-                        possible_next_pattern += possible_term * (
-                            4 ** (feature_count - i - 1)
-                        )
-                        tmp_possible = possible_next_pattern
-                        idx = -1
-                        while tmp_possible > 0:
-                            idx += 1
-                            value = tmp_possible % 4
-                            tmp_possible = tmp_possible // 4
-                            if value == 0:
-                                continue
+                        possible_next_pattern.add((possible_term, features[i]))
+                        for term in possible_next_pattern:
                             test_pattern = possible_next_pattern
-                            # print(test_pattern)
-                            test_pattern -= value * (4**idx)
-                            # print(test_pattern)
+                            test_pattern.discard(term)
                             if not prev_degree_non_prime_patterns.__contains__(
                                 test_pattern
                             ):
-                                # print(prev_degree_non_prime_patterns)
                                 should_break = True
                                 break
                         if should_break:
                             # print("      Loop4 Continue")
                             continue
-                        pos_count_prime = 0
-                        for sample_t in X_pos:
-                            if self.__match_terms(
-                                sample_t,
-                                self.__gen_pattern(
-                                    possible_next_pattern, feature_count
-                                ),
-                            ):
-                                pos_count_prime += 1
+                        filters = [
+                            pl.col(column_name) == desired_value
+                            for desired_value, column_name in possible_next_pattern
+                        ]
+                        filter = filters[0]
+                        for f in filters[1:]:
+                            filter &= f
+                        pos_count_prime = len(X_pos.filter(filter))
+                        # for sample_t in X_pos:
+                        #     if self.__match_terms(sample_t, possible_next_pattern):
+                        #         pos_count_prime += 1
                         if self.__fn_tolerance <= 2 * pos_count_prime / len(X_pos):
                             # print("        Cond1 Pass: ", possible_next_pattern)
-                            pos_count = 0
-                            neg_count = 0
-                            pattern = self.__gen_pattern(
-                                possible_next_pattern, feature_count
-                            )
-                            for sample_pos in X_pos:
-                                if self.__match_terms(
-                                    sample_pos,
-                                    pattern,
-                                ):
-                                    pos_count += 1
-
-                            for sample_neg in X_neg:
-                                if self.__match_terms(
-                                    sample_neg,
-                                    pattern,
-                                ):
-                                    neg_count += 1
+                            pos_count = len(X_pos.filter(filter))
+                            neg_count = len(X_neg.filter(filter))
+                            # pattern = self.__gen_pattern(
+                            #     possible_next_pattern, feature_count
+                            # )
+                            # for sample_pos in X_pos:
+                            #     if self.__match_terms(
+                            #         sample_pos,
+                            #         pattern,
+                            #     ):
+                            #         pos_count += 1
+                            #
+                            # for sample_neg in X_neg:
+                            #     if self.__match_terms(
+                            #         sample_neg,
+                            #         pattern,
+                            #     ):
+                            #         neg_count += 1
 
                             # print(pos_count, neg_count)
                             pos_pct = pos_count
@@ -163,23 +157,23 @@ class MaxPatterns:
                             if hd >= self.__fp_tolerance:
                                 # print("          Cond2 Pass: ", hd)
                                 prime_patterns.add(possible_next_pattern)
-                                pattern = self.__gen_pattern(
-                                    possible_next_pattern, feature_count
-                                )
-                                pos_mask = []
-                                for sample_pos in X_pos:
-                                    if self.__match_terms(sample_pos, pattern):
-                                        pos_mask.append(False)
-                                    else:
-                                        pos_mask.append(True)
-                                neg_mask = []
-                                X_pos = X_pos[pos_mask]
-                                for sample_neg in X_neg:
-                                    if self.__match_terms(sample_neg, pattern):
-                                        neg_mask.append(False)
-                                    else:
-                                        neg_mask.append(True)
-                                X_neg = X_neg[neg_mask]
+                                # pattern = self.__gen_pattern(
+                                #     possible_next_pattern, feature_count
+                                # )
+                                # pos_mask = []
+                                # for sample_pos in X_pos:
+                                #     if self.__match_terms(sample_pos, pattern):
+                                #         pos_mask.append(False)
+                                #     else:
+                                #         pos_mask.append(True)
+                                X_pos = X_pos.filter(filter)
+                                # neg_mask = []
+                                # for sample_neg in X_neg:
+                                #     if self.__match_terms(sample_neg, pattern):
+                                #         neg_mask.append(False)
+                                #     else:
+                                #         neg_mask.append(True)
+                                X_neg = X_neg.filter(filter)
                             else:
                                 # print("          Cond2 Fail: ", hd)
                                 curr_degree_non_prime_patterns.add(
@@ -188,60 +182,68 @@ class MaxPatterns:
             prev_degree_non_prime_patterns = curr_degree_non_prime_patterns
         return prime_patterns
 
-    def __gen_pattern(self, a, n):
-        out: List[Optional[bool]] = [None for _ in range(n)]
-        tmp = a
-        idx = 0
-        while tmp > 0:
-            value = tmp % 4
-            tmp = tmp // 4
-            val = None
-            if value == 3:
-                val = True
-            if value == 2:
-                val = False
-            out[idx] = val
-            idx += 1
-        # print(a, out)
-        return out
-
-    def __match_terms(self, a, b):
-        out = True
-        for i in range(len(a)):
-            if b[i] is not None:
-                if a[i] == b[i]:
-                    pass
-                else:
-                    out = False
-        return out
-
-    def fit(self, Xbin, y):
+    #
+    # def __gen_pattern(self, a, n):
+    #     out: List[Optional[bool]] = [None for _ in range(n)]
+    #     tmp = a
+    #     idx = 0
+    #     while tmp > 0:
+    #         value = tmp % 4
+    #         tmp = tmp // 4
+    #         val = None
+    #         if value == 3:
+    #             val = True
+    #         if value == 2:
+    #             val = False
+    #         out[idx] = val
+    #         idx += 1
+    #     # print(a, out)
+    #     return out
+    #
+    # def __match_terms(self, a, b):
+    #     out = True
+    #     for i in range(len(a)):
+    #         if b[i] is not None:
+    #             if a[i] == b[i]:
+    #                 pass
+    #             else:
+    #                 out = False
+    #     return out
+    #
+    # def __into_bitwise(self, sample):
+    #     out = 0
+    #     for i, v in enumerate(sample):
+    #         val = 3 if v else 2
+    #         out += val * (2**i)
+    #     return out
+    #
+    def fit(self, Xbin: pl.DataFrame, y: pl.Series):
         # #
         unique, counts = np.unique(y, return_counts=True)
         #
         # #
+        features = Xbin.columns
+        feature_count = len(features)
+
         self.__rules.clear()
         self.__labels = unique
         self.__most_frequent_label = unique[np.argmax(counts)]
-        num_zeros = 2 * len(Xbin[0])
         # #
         for lable in unique:
             print(lable)
-            X_pos = []
-            X_neg = []
-            for idx in range(len(Xbin)):
-                if lable == y[idx]:
-                    X_pos.append(Xbin[idx])
-                else:
-                    X_neg.append(Xbin[idx])
+            X = Xbin.hstack([y])
+            X_pos = X.filter(pl.col("label") == lable).drop("label")
+            X_neg = X.filter(pl.col("label") != lable).drop("label")
 
-            patterns = self.__base_fit(np.array(X_pos), np.array(X_neg))
+            patterns = self.__base_fit(X_pos, X_neg, feature_count)
             self.__rules.append(patterns)
-        # print(self.__rules)
-        for i in self.__rules:
-            for j in i:
-                print(f"{{:0{num_zeros}b}}".format(j))
-            print()
+        print(self.__rules)
+
+        # num_zeros = 2 * feature_count
+        # for i in self.__rules:
+        #     for j in i:
+        #         print(f"{{:0{num_zeros}b}}".format(j))
+        #     print()
         # rules_weights = []
         # labels_weights = {}
         #
