@@ -108,6 +108,7 @@ class MaxPatterns:
                         for term in possible_next_pattern:
                             test_pattern = copy.deepcopy(possible_next_pattern)
                             test_pattern.discard(term)
+                            print(test_pattern)
                             if not prev_degree_non_prime_patterns.__contains__(
                                 test_pattern
                             ):
