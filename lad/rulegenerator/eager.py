@@ -69,7 +69,7 @@ class MaxPatterns:
         return output
 
     def __base_fit(self, X_pos: pl.DataFrame, X_neg: pl.DataFrame, feature_count):
-        prime_patterns = set()
+        prime_patterns = []
         prev_degree_non_prime_patterns = [set()]
         features = X_pos.columns
         max = self.__max_terms
@@ -157,7 +157,7 @@ class MaxPatterns:
 
                             if hd >= self.__fp_tolerance:
                                 print("          Cond2 Pass: ", hd)
-                                prime_patterns.add(possible_next_pattern)
+                                prime_patterns.append(possible_next_pattern)
                                 # pattern = self.__gen_pattern(
                                 #     possible_next_pattern, feature_count
                                 # )
