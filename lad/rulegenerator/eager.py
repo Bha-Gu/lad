@@ -103,8 +103,8 @@ class MaxPatterns:
                         print("      Loop4 Term", possible_term)
                         should_break = False
                         possible_next_pattern = curr_base_patterns
-                        # print(possible_next_pattern)
                         possible_next_pattern.add((possible_term, features[i]))
+                        print(possible_next_pattern)
                         for term in possible_next_pattern:
                             test_pattern = copy.deepcopy(possible_next_pattern)
                             test_pattern.discard(term)
