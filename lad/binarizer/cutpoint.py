@@ -3,8 +3,7 @@ import polars as pl
 
 
 class CutpointBinarizer:
-    def __init__(self, tolerance=1.0):
-        self.__tolerance = tolerance
+    def __init__(self):
         self.__cutpoints = []
 
     def get_cutpoints(self):
@@ -13,58 +12,41 @@ class CutpointBinarizer:
     def fit(self, X: pl.DataFrame, y: pl.Series):
         self.__cutpoints = []
 
-        for column in X.get_columns():
-            values_type = column.dtype.is_numeric()
+        schema = X.schema
 
-            if values_type:
-                sorted_values = column.unique().sort()
-                delta = sorted_values.diff(null_behavior="drop").sum()
+        nominal_df = X.select(
+            pl.col(col) for col, dtype in schema.items() if not dtype.is_numeric()
+        )
+        combined_df = X.hstack([y])
 
-                tolerance = delta / len(sorted_values)
+        numeric_df = combined_df.group_by("label").agg(
+            [
+                pl.concat_list([pl.col(col).min(), pl.col(col).max()])
+                for col, dtype in schema.items()
+                if dtype.is_numeric()
+            ]
+        )
 
-                if len(sorted_values) <= 2:
-                    tolerance = 0.0
+        numeric_cols = numeric_df.columns
+        nominal_cols = nominal_df.columns
 
-                cutpoints = []
-                prev_labels = None  # Previuos labels
-                prev_value = None  # Previuos xi
-                count = 1
-                # Finding transitions
-                for value in sorted_values:
-                    # Classes where v appears
-                    indexes = (column == value).arg_true()
-                    labels = set(y[indexes].to_list())
-                    # Main condition
-                    if prev_labels is not None:
-                        variation = value - prev_value  # Current - Previous
-                        if variation > tolerance * self.__tolerance / count:
-                            # Testing for transition
-                            if (
-                                len(prev_labels) > 1 or len(labels) > 1
-                            ) or prev_labels != labels:
-                                count = 0
-                                cutpoints.append(prev_value + variation / 2.0)
-
-                        count += 1
-
-                    prev_labels = labels
-                    prev_value = value
-
-                self.__cutpoints.append((True, cutpoints))
-
-            else:
-                self.__cutpoints.append((False, column.to_list()))
+        for col in X.columns:
+            if col in numeric_cols:
+                flattened_series = numeric_df[col].explode().sort().unique()
+                trimmed_series = flattened_series[1:-1]
+                self.__cutpoints.append(trimmed_series)
+            if col in nominal_cols:
+                self.__cutpoints.append(nominal_df[col].unique())
 
         return self.__cutpoints
 
     def transform(self, X: pl.DataFrame) -> pl.DataFrame:
         Xbin = pl.DataFrame()
 
-        print(self.__cutpoints)
-        for column, (type_data, cutpoints) in zip(X.get_columns(), self.__cutpoints):
-            column_name = column.name
-
-            if type_data:
+        for cutpoints in self.__cutpoints:
+            column_name = cutpoints.name
+            column = X[column_name]
+            if cutpoints.dtype.is_numeric():
                 col = (column <= cutpoints[0]).alias(f"{column_name}<={cutpoints[0]}")
                 Xbin = Xbin.hstack([col])
 
@@ -83,7 +65,6 @@ class CutpointBinarizer:
                     col = (column == value).alias(f"{column_name}={value}")
                     Xbin = Xbin.hstack([col])
 
-        print(Xbin.shape)
         return Xbin
 
     def fit_transform(self, X, y):

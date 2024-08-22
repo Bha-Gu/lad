@@ -68,6 +68,25 @@ class MaxPatterns:
 
         return output
 
+    # def __sec_fit(self, X: pl.DataFrame, y: pl.Series):
+    #     prime_patterns = []
+    #     prev_degree_non_prime_patterns = [set()]
+    #     features = X.columns
+    #     feature_count = len(features)
+    #     max = self.__max_terms
+    #     if max > feature_count or max == 0:
+    #         max = feature_count
+    #     for d in range(1,max):
+    #         if len(X) == 0:
+    #             break
+    #         curr_degree_patterns = []
+    #         for base_pattern in prev_degree_non_prime_patterns:
+    #             for feature in features:
+    #
+    #
+    #
+    #     pass
+
     def __base_fit(self, X_pos: pl.DataFrame, X_neg: pl.DataFrame, feature_count):
         prime_patterns = []
         prev_degree_non_prime_patterns = [set()]
@@ -123,29 +142,11 @@ class MaxPatterns:
                         for f in filters[1:]:
                             filter &= f
                         pos_count_prime = len(X_pos.filter(filter))
-                        # for sample_t in X_pos:
-                        #     if self.__match_terms(sample_t, possible_next_pattern):
-                        #         pos_count_prime += 1
+
                         if self.__fn_tolerance <= 2 * pos_count_prime / len(X_pos):
                             print("        Cond1 Pass: ", possible_next_pattern)
                             pos_count = len(X_pos.filter(filter))
                             neg_count = len(X_neg.filter(filter))
-                            # pattern = self.__gen_pattern(
-                            #     possible_next_pattern, feature_count
-                            # )
-                            # for sample_pos in X_pos:
-                            #     if self.__match_terms(
-                            #         sample_pos,
-                            #         pattern,
-                            #     ):
-                            #         pos_count += 1
-                            #
-                            # for sample_neg in X_neg:
-                            #     if self.__match_terms(
-                            #         sample_neg,
-                            #         pattern,
-                            #     ):
-                            #         neg_count += 1
 
                             print(pos_count, neg_count)
                             pos_pct = pos_count
@@ -158,22 +159,7 @@ class MaxPatterns:
                             if hd >= self.__fp_tolerance:
                                 print("          Cond2 Pass: ", hd)
                                 prime_patterns.append(possible_next_pattern)
-                                # pattern = self.__gen_pattern(
-                                #     possible_next_pattern, feature_count
-                                # )
-                                # pos_mask = []
-                                # for sample_pos in X_pos:
-                                #     if self.__match_terms(sample_pos, pattern):
-                                #         pos_mask.append(False)
-                                #     else:
-                                #         pos_mask.append(True)
                                 X_pos = X_pos.filter(filter)
-                                # neg_mask = []
-                                # for sample_neg in X_neg:
-                                #     if self.__match_terms(sample_neg, pattern):
-                                #         neg_mask.append(False)
-                                #     else:
-                                #         neg_mask.append(True)
                                 X_neg = X_neg.filter(filter)
                             else:
                                 print("          Cond2 Fail: ", hd)
@@ -183,41 +169,6 @@ class MaxPatterns:
             prev_degree_non_prime_patterns = curr_degree_non_prime_patterns
         return prime_patterns
 
-    #
-    # def __gen_pattern(self, a, n):
-    #     out: List[Optional[bool]] = [None for _ in range(n)]
-    #     tmp = a
-    #     idx = 0
-    #     while tmp > 0:
-    #         value = tmp % 4
-    #         tmp = tmp // 4
-    #         val = None
-    #         if value == 3:
-    #             val = True
-    #         if value == 2:
-    #             val = False
-    #         out[idx] = val
-    #         idx += 1
-    #     # print(a, out)
-    #     return out
-    #
-    # def __match_terms(self, a, b):
-    #     out = True
-    #     for i in range(len(a)):
-    #         if b[i] is not None:
-    #             if a[i] == b[i]:
-    #                 pass
-    #             else:
-    #                 out = False
-    #     return out
-    #
-    # def __into_bitwise(self, sample):
-    #     out = 0
-    #     for i, v in enumerate(sample):
-    #         val = 3 if v else 2
-    #         out += val * (2**i)
-    #     return out
-    #
     def fit(self, Xbin: pl.DataFrame, y: pl.Series):
         # #
         unique, counts = np.unique(y, return_counts=True)
