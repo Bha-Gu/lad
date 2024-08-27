@@ -21,43 +21,28 @@ class MaxPatterns:
         self.__fn_tolerance = fn_tolerance
         self.__max_terms = max_terms_in_patterns
 
-        self.__cutpoints = binarizer.get_cutpoints()
-        self.__selected = selector.get_selected()
+        self.__binarizer = binarizer
+        self.__selector = selector
 
     def predict(self, X):
-        weights = {}
+        X = self.__selector.transform(self.__binarizer.transform(X))
+        y = []
+        columns = X.columns
+        for sample in X.rows():
+            # print(sample)
+            prediction = []
+            # print(rules)
+            for i, r in enumerate(self.__rules):
+                # print(r)
+                out = True
+                for c, rule in r:
+                    for v, f in rule:
+                        # print(sample, f)
+                        out &= sample[columns.index(f)] == v
 
-        for r in self.__rules:
-            label = r["label"]
-            weight = r["weight"]
-
-            indexes = np.arange(X.shape[0])
-
-            for i, condition in enumerate(r["conditions"]):
-                att = r["attributes"][i]
-                val = r["values"][i]
-
-                if condition:
-                    # print(f'att{att} <= {val}', end=', ')
-                    indexes = indexes[np.where(X.T[att, indexes] <= val)]
-                else:
-                    # print(f'att{att} > {val}', end=', ')
-                    indexes = indexes[np.where(X.T[att, indexes] > val)]
-
-            # print(r['label'])
-
-            for i in indexes:
-                weights[i] = weights.get(i, {})
-                weights[i][label] = weights[i].get(label, 0) + weight
-
-        predictions = []
-        for i in range(X.shape[0]):
-            if i not in weights:
-                predictions.append(self.__most_frequent_label)
-            else:
-                predictions.append(max(weights[i], key=weights[i].get))
-
-        return np.array(predictions)
+                prediction.append(c if out else -c)
+            y.append(np.argmax(np.array(prediction)))
+        return np.array(y)
 
     def predict_proba(self, X):
         predictions = self.predict(X)
@@ -88,6 +73,7 @@ class MaxPatterns:
     #     pass
 
     def __base_fit(self, X_pos: pl.DataFrame, X_neg: pl.DataFrame, feature_count):
+        size = X_pos.shape[0] + X_neg.shape[0]
         prime_patterns = []
         prev_degree_non_prime_patterns = [set()]
         features = X_pos.columns
@@ -160,6 +146,7 @@ class MaxPatterns:
                             if hd >= self.__fp_tolerance:
                                 # print("          Cond2 Pass: ", hd)
                                 hd *= len(X_pos) + len(X_neg)
+                                hd /= size
                                 prime_patterns.append((hd, possible_next_pattern))
                                 X_pos = X_pos.filter(~filter)
                                 X_neg = X_neg.filter(~filter)
