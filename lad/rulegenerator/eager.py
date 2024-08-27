@@ -141,6 +141,7 @@ class MaxPatterns:
                         filter = filters[0]
                         for f in filters[1:]:
                             filter &= f
+                        print(filter)
                         pos_count_prime = len(X_pos.filter(filter))
 
                         if self.__fn_tolerance <= 2 * pos_count_prime / len(X_pos):
