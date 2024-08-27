@@ -190,6 +190,7 @@ class MaxPatterns:
             patterns = self.__base_fit(X_pos, X_neg, feature_count)
             self.__rules.append(patterns)
         print(self.__rules)
+        return self.__rules
 
         # num_zeros = 2 * feature_count
         # for i in self.__rules:
