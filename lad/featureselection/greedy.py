@@ -78,7 +78,6 @@ class GreedySetCover:
         print(self.selected)
         print(features)
         print(removed)
-        print(Xbin.select([pl.col(col) for col in self.__selected]))
         return self.__selected
 
     def transform(self, Xbin):
