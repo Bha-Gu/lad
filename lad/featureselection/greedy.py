@@ -74,7 +74,10 @@ class GreedySetCover:
                 if a.all() or b.all():
                     removed.append(j)
 
-        self.selected = [f for i, f in enumerate(features) if f not in removed]
+        self.selected = [f for f in features if f not in removed]
+        print(self.selected)
+        print(features)
+        print(removed)
 
     def transform(self, Xbin):
         return Xbin.select(self.__selected)
