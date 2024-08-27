@@ -160,8 +160,8 @@ class MaxPatterns:
                             if hd >= self.__fp_tolerance:
                                 print("          Cond2 Pass: ", hd)
                                 prime_patterns.append(possible_next_pattern)
-                                X_pos = X_pos.filter(filter)
-                                X_neg = X_neg.filter(filter)
+                                X_pos = X_pos.filter(~filter)
+                                X_neg = X_neg.filter(~filter)
                                 print(len(X_pos), len(X_neg))
                             else:
                                 print("          Cond2 Fail: ", hd)
