@@ -79,7 +79,7 @@ class LADClassifier(BaseEstimator, ClassifierMixin):
         return self  # `fit` should always return `self`
 
     def predict(self, X):
-        X = check_array(X, accept_sparse=True)
+        # X = check_array(X, accept_sparse=True)
         check_is_fitted(self, "is_fitted_")
 
         return self.model.predict(X)
