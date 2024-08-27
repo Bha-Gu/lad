@@ -78,6 +78,7 @@ class GreedySetCover:
         print(self.selected)
         print(features)
         print(removed)
+        print(Xbin.select(self.__selected))
 
     def transform(self, Xbin):
         return Xbin.select(self.__selected)
