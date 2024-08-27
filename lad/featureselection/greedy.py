@@ -76,8 +76,8 @@ class GreedySetCover:
                 if a.all() or b.all():
                     removed.append(j)
 
-        self.selected = [f for f in features if f not in removed]
-        print(self.selected)
+        self.__selected = [f for f in features if f not in removed]
+        print(self.__selected)
         print(features)
         print(removed)
         return self.__selected
