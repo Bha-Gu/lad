@@ -95,14 +95,14 @@ class MaxPatterns:
         if max > feature_count or max == 0:
             max = feature_count
         for d in range(1, max):
-            print("Loop1 Index: ", d)
+            # print("Loop1 Index: ", d)
             if len(X_pos) == 0:
                 break
             curr_degree_non_prime_patterns = []
             for curr_base_patterns in prev_degree_non_prime_patterns:
                 if len(X_pos) == 0:
                     break
-                print("  Loop2 CBP: ", curr_base_patterns)
+                # print("  Loop2 CBP: ", curr_base_patterns)
                 largets_idx_of_terms_in_curr_patterns = -1
 
                 for idx, feature in enumerate(features):
@@ -115,24 +115,24 @@ class MaxPatterns:
                 start_of_range = largets_idx_of_terms_in_curr_patterns + 1
 
                 for i in range(start_of_range, feature_count):
-                    print("    Loop3 Index: ", i)
+                    # print("    Loop3 Index: ", i)
                     for possible_term in [True, False]:
                         if len(X_pos) == 0:
                             break
-                        print("      Loop4 Term", possible_term)
+                        # print("      Loop4 Term", possible_term)
                         should_break = False
                         possible_next_pattern = copy.deepcopy(curr_base_patterns)
                         possible_next_pattern.add((possible_term, features[i]))
-                        print(possible_next_pattern)
+                        # print(possible_next_pattern)
                         for term in possible_next_pattern:
                             test_pattern = copy.deepcopy(possible_next_pattern)
                             test_pattern.discard(term)
-                            print(test_pattern)
+                            # print(test_pattern)
                             if test_pattern not in prev_degree_non_prime_patterns:
                                 should_break = True
                                 break
                         if should_break:
-                            print("      Loop4 Continue")
+                            # print("      Loop4 Continue")
                             continue
                         filters = [
                             pl.col(column_name) == desired_value
@@ -141,15 +141,15 @@ class MaxPatterns:
                         filter = filters[0]
                         for f in filters[1:]:
                             filter &= f
-                        print(filter)
+                        # print(filter)
                         pos_count_prime = len(X_pos.filter(filter))
 
                         if self.__fn_tolerance <= 2 * pos_count_prime / len(X_pos):
-                            print("        Cond1 Pass: ", possible_next_pattern)
+                            # print("        Cond1 Pass: ", possible_next_pattern)
                             pos_count = len(X_pos.filter(filter))
                             neg_count = len(X_neg.filter(filter))
 
-                            print(pos_count, neg_count)
+                            # print(pos_count, neg_count)
                             pos_pct = pos_count
                             neg_pct = neg_count
                             base = pos_pct + neg_pct
@@ -158,13 +158,13 @@ class MaxPatterns:
                                 hd = pos_pct / base
 
                             if hd >= self.__fp_tolerance:
-                                print("          Cond2 Pass: ", hd)
-                                prime_patterns.append(possible_next_pattern)
+                                # print("          Cond2 Pass: ", hd)
+                                prime_patterns.append((hd, possible_next_pattern))
                                 X_pos = X_pos.filter(~filter)
                                 X_neg = X_neg.filter(~filter)
-                                print(len(X_pos), len(X_neg))
+                                # print(len(X_pos), len(X_neg))
                             else:
-                                print("          Cond2 Fail: ", hd)
+                                # print("          Cond2 Fail: ", hd)
                                 curr_degree_non_prime_patterns.append(
                                     possible_next_pattern
                                 )
