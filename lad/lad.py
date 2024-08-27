@@ -6,6 +6,8 @@ https://scikit-learn.org/stable/developers/develop.html
 https://sklearn-template.readthedocs.io/en/latest/quick_start.html
 """
 
+import numpy as np
+import polars as pl
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
 
@@ -54,8 +56,8 @@ class LADClassifier(BaseEstimator, ClassifierMixin):
         self.max_features = max_features
         self.model = None
 
-    def fit(self, X, y):
-        X, y = check_X_y(X, y, accept_sparse=True)
+    def fit(self, X: pl.DataFrame, y: pl.Series):
+        # X, y = check_X_y(X, y.to_list(), accept_sparse=True)
         self.is_fitted_ = True
 
         print("# Binarization")
@@ -63,7 +65,7 @@ class LADClassifier(BaseEstimator, ClassifierMixin):
         Xbin = cpb.fit_transform(X, y)
 
         print("# Feature Selection")
-        gsc = GreedySetCover(self.max_features)
+        gsc = GreedySetCover()
         Xbin = gsc.fit_transform(Xbin, y)
 
         print("# Rule building")

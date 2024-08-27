@@ -5,84 +5,76 @@ import polars as pl
 class GreedySetCover:
     """Set covering problem solver"""
 
-    def __init__(self, max_features=0):
+    def __init__(self):
         self.__selected = []
-        # self.__ranking = []
-        self.__scp = None
-        self.__max = max_features
 
     def get_selected(self):
         return np.array(self.__selected)
 
     def fit(self, Xbin: pl.DataFrame, y: pl.Series):
-        self.__selected = []
-
-        Xbin_prune = Xbin.clone()
+        Xbin_prune = Xbin
+        y_series = y
+        features = Xbin_prune.columns
 
         labels = y.unique().sort().to_list()
         class_count = len(labels)
-        sample_count = Xbin_prune.shape[0]
-        y_idx = [labels.index(val) for val in y]
+        # Create a DataFrame with the feature values and the corresponding labels
 
-        subset_index = np.zeros(sample_count, dtype=int)
+        df = Xbin_prune.hstack([y_series])
 
-        invalids = []
+        # Group by label and sum the occurrences of True values for each feature
+        total = df.group_by("label", maintain_order=True).sum().drop("label")
 
-        while True:
-            subset_count = 2 ** len(self.__selected)
-            features = Xbin_prune.columns
-            feature_count = len(features)
+        y_t = (
+            df.group_by("label", maintain_order=True)
+            .len()
+            .select([pl.col("len").alias("y_t")])
+            .to_series()
+        )
 
-            total = np.zeros((subset_count, class_count, feature_count), dtype=int)
-            y_t = np.zeros((subset_count, class_count), dtype=int)
+        # Calculate the total occurrence of True values for each feature across all classes
+        T = total.sum()
+        # Initialize the final array
+        final = T * y_t.sum()
 
-            for i in range(sample_count):
-                for feature in range(feature_count):
-                    if Xbin_prune[i, feature]:
-                        total[subset_index[i], y_idx[i], feature] += 1
-                y_t[subset_index[i], y_idx[i]] += 1
+        # Subtract the contributions from each class
+        for classs in range(class_count):
+            tc = total[classs]
+            final -= y_t[classs] * tc
+            for subclass in range(classs + 1, class_count):
+                final -= 2 * tc * total[subclass]
 
-            T = np.sum(total, axis=1)
-            YT = np.sum(y_t, axis=1)
+        # Convert final to a Series
+        final_series = pl.Series(final.row(0))
 
-            final = np.zeros((subset_count, feature_count), dtype=int)
-            for feature in range(feature_count):
-                for subset in range(subset_count):
-                    final[subset, feature] += YT[subset] * T[subset, feature]
-                    for classs in range(class_count):
-                        final[subset, feature] -= (
-                            y_t[subset, classs] * total[subset, classs, feature]
-                        )
-                        for subclass in range(classs + 1, class_count):
-                            final[subset, feature] -= (
-                                2
-                                * total[subset, classs, feature]
-                                * total[subset, subclass, feature]
-                            )
+        # Identify features to reject based on the threshold
+        rejected = final_series / final_series.max() <= 1 / class_count
 
-            final_rank = np.sum(final, axis=0)
+        # Create a mask for the selected features
+        features = [f for i, f in enumerate(features) if not rejected[i]]
 
-            if np.sum(final_rank) == 0:
-                break
+        feature_count = len(features)
 
-            best = np.argmax(final_rank)
-            base_best = features[best]
+        removed = []
 
-            self.__selected.append(base_best)
-            if len(self.__selected) == self.__max:
-                break
+        for i in range(feature_count):
+            if i in removed:
+                continue
+            current_col = Xbin_prune[features[i]]
 
-            for sample in range(sample_count):
-                if Xbin_prune[base_best][sample]:
-                    subset_index[sample] += 2 ** (len(self.__selected) - 1)
+            for j in range(i + 1, feature_count):
+                if j in removed:
+                    continue
+                comparison_col = Xbin_prune[features[j]]
 
-            rejected = np.where(final_rank == 0)[0]
+                # Vectorized XOR and NOT operations
+                a = current_col ^ comparison_col  # XOR operation
+                b = ~a  # NOT XOR
 
-            mask = np.ones(feature_count, dtype=bool)
-            mask[rejected] = False
-            mask[best] = False
-            features = np.array(features)[mask]
-            Xbin_prune = Xbin_prune.select(features)
+                if a.all() or b.all():
+                    removed.append(j)
+
+        self.selected = [f for i, f in enumerate(features) if not removed[i]]
 
     def transform(self, Xbin):
         return Xbin.select(self.__selected)

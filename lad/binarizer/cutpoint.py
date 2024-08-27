@@ -3,50 +3,71 @@ import polars as pl
 
 
 class CutpointBinarizer:
-    def __init__(self):
+    def __init__(self, tolerance=1.0):
         self.__cutpoints = []
+        self.__tolerance = tolerance
 
     def get_cutpoints(self):
         return self.__cutpoints
 
     def fit(self, X: pl.DataFrame, y: pl.Series):
         self.__cutpoints = []
-
+        self.__tolerance = 1.0
+        X_tmp = X.hstack([y])
         schema = X.schema
+        # print(schema)
+        features = X.columns
+        for feature in features:
+            if feature == "label":
+                continue
+            col = X_tmp.select(pl.col(feature), pl.col("label"))
+            if schema[feature].is_numeric():
+                sorted_values = col.sort(feature)
+                delta = sorted_values[feature].diff(null_behavior="drop").sum()
+                tolerance = (
+                    delta / len(sorted_values) if len(sorted_values) > 2 else 0.0
+                )
+                cutpoints = []
+                prev_labels = None
+                prev_value = None
+                count = 1
+                labels = set()
 
-        nominal_df = X.select(
-            pl.col(col) for col, dtype in schema.items() if not dtype.is_numeric()
-        )
-        combined_df = X.hstack([y])
+                for value, label in sorted_values.rows():
+                    if value != prev_value:
+                        labels = set()
+                    labels.add(label)
 
-        numeric_df = combined_df.group_by("label").agg(
-            [
-                pl.concat_list([pl.col(col).min(), pl.col(col).max()])
-                for col, dtype in schema.items()
-                if dtype.is_numeric()
-            ]
-        )
+                    if prev_labels is not None:
+                        variation = value - prev_value
+                        if variation > tolerance * self.__tolerance / count:
+                            if (
+                                len(prev_labels) > 1 or len(labels) > 1
+                            ) or prev_labels != labels:
+                                count = 0
+                                cutpoints.append(prev_value + variation / 2.0)
 
-        numeric_cols = numeric_df.columns
-        nominal_cols = nominal_df.columns
+                        count += 1
 
-        for col in X.columns:
-            if col in numeric_cols:
-                flattened_series = numeric_df[col].explode().sort().unique()
-                trimmed_series = flattened_series[1:-1]
-                self.__cutpoints.append(trimmed_series)
-            if col in nominal_cols:
-                self.__cutpoints.append(nominal_df[col].unique())
+                    prev_labels = labels
+                    prev_value = value
+                if len(cutpoints) == 0:
+                    cutpoints.append(sorted_values[feature].mean())
+                self.__cutpoints.append((True, cutpoints))
+            else:
+                self.__cutpoints.append((False, col[feature].to_list()))
 
         return self.__cutpoints
 
     def transform(self, X: pl.DataFrame) -> pl.DataFrame:
         Xbin = pl.DataFrame()
 
-        for cutpoints in self.__cutpoints:
-            column_name = cutpoints.name
+        # print(__cutpoints)
+        for column_name, (type_val, cutpoints) in zip(X.columns, self.__cutpoints):
+            # cutpoints = cutpoints[cutpoints.columns[0]]
+            # column_name = cutpoints.name
             column = X[column_name]
-            if cutpoints.dtype.is_numeric():
+            if type_val:
                 col = (column <= cutpoints[0]).alias(f"{column_name}<={cutpoints[0]}")
                 Xbin = Xbin.hstack([col])
 
