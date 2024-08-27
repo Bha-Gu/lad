@@ -161,6 +161,7 @@ class MaxPatterns:
                                 prime_patterns.append(possible_next_pattern)
                                 X_pos = X_pos.filter(filter)
                                 X_neg = X_neg.filter(filter)
+                                print(len(X_pos), len(X_neg))
                             else:
                                 print("          Cond2 Fail: ", hd)
                                 curr_degree_non_prime_patterns.append(
