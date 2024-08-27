@@ -12,6 +12,8 @@ class GreedySetCover:
         return np.array(self.__selected)
 
     def fit(self, Xbin: pl.DataFrame, y: pl.Series):
+        self.__selected = []
+
         Xbin_prune = Xbin
         y_series = y
         features = Xbin_prune.columns
