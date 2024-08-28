@@ -1,6 +1,5 @@
 import copy
 
-import numpy as np
 import polars as pl
 
 
@@ -52,17 +51,11 @@ class MaxPatterns:
                         t_c *= 1 - c
 
                 prediction.append(1 - t_c)
-            y.append(np.argmax(np.array(prediction)))
+            y.append((pl.Series(prediction)).arg_max())
         return pl.Series("label", y)
 
     def predict_proba(self, X):
-        predictions = self.predict(X)
-        output = np.zeros((len(X), self.__labels))
-
-        for i in range(len(X)):
-            output[i][predictions[i]] = 1
-
-        return output
+        pass
 
     def __base_fit(self, X_pos: pl.DataFrame, X_neg: pl.DataFrame, feature_count):
         size = X_pos.shape[0] + X_neg.shape[0]
@@ -139,15 +132,13 @@ class MaxPatterns:
         return prime_patterns
 
     def fit(self, Xbin: pl.DataFrame, y: pl.Series):
-        unique, counts = np.unique(y, return_counts=True)
+        unique = y.unique()
         features = Xbin.columns
         feature_count = len(features)
 
         self.__rules.clear()
-        self.__labels = unique
-        self.__most_frequent_label = unique[np.argmax(counts)]
+        X = Xbin.hstack([y])
         for lable in unique:
-            X = Xbin.hstack([y])
             X_pos = X.filter(pl.col("label") == lable).drop("label")
             X_neg = X.filter(pl.col("label") != lable).drop("label")
 

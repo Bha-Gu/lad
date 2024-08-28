@@ -1,4 +1,3 @@
-import numpy as np
 import polars as pl
 
 
@@ -14,7 +13,7 @@ class GreedySetCover:
         self.__selected = []
 
     def get_selected(self):
-        return np.array(self.__selected)
+        return pl.Series("Selected", self.__selected)
 
     def fit(self, Xbin: pl.DataFrame, y: pl.Series):
         self.__selected = []

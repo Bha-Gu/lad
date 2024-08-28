@@ -20,8 +20,3 @@ y_hat = clf.predict(X_test)
 
 print(classification_report(y_test, y_hat))
 print(clf)
-
-# Cross-validation
-# import numpy as np
-# scores = cross_validate(LADClassifier(mode='lazy'), X, y, scoring=['accuracy'])
-# print(np.mean(scores['test_accuracy']))
