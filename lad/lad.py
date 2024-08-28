@@ -88,7 +88,7 @@ class LADClassifier(BaseEstimator, ClassifierMixin):
         # X = check_array(X, accept_sparse=True)
         check_is_fitted(self, "is_fitted_")
 
-        return self.model.predict(X).apply(
+        return self.model.predict(X).map_elements(
             lambda x: self.__labels[x], return_dtype=self.__labels.dtype
         )
 
