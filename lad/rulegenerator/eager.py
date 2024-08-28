@@ -7,6 +7,18 @@ import polars as pl
 
 
 class MaxPatterns:
+    """
+    Rule Generation
+
+    Attributes
+    ---------
+    fp_tolerance: float
+        (Default = 0.5)
+
+    fn_tolerance: float
+        (Default = 0.5)
+    """
+
     def __init__(
         self,
         binarizer,
@@ -52,25 +64,6 @@ class MaxPatterns:
             output[i][predictions[i]] = 1
 
         return output
-
-    # def __sec_fit(self, X: pl.DataFrame, y: pl.Series):
-    #     prime_patterns = []
-    #     prev_degree_non_prime_patterns = [set()]
-    #     features = X.columns
-    #     feature_count = len(features)
-    #     max = self.__max_terms
-    #     if max > feature_count or max == 0:
-    #         max = feature_count
-    #     for d in range(1,max):
-    #         if len(X) == 0:
-    #             break
-    #         curr_degree_patterns = []
-    #         for base_pattern in prev_degree_non_prime_patterns:
-    #             for feature in features:
-    #
-    #
-    #
-    #     pass
 
     def __base_fit(self, X_pos: pl.DataFrame, X_neg: pl.DataFrame, feature_count):
         size = X_pos.shape[0] + X_neg.shape[0]

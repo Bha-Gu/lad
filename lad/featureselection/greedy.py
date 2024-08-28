@@ -3,7 +3,12 @@ import polars as pl
 
 
 class GreedySetCover:
-    """Set covering problem solver"""
+    """
+    Feature Selection
+
+    Basic class based feture selection optimized for binary data
+    Threshold is based of class count (subject to change)
+    """
 
     def __init__(self):
         self.__selected = []

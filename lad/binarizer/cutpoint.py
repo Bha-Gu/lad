@@ -3,6 +3,19 @@ import polars as pl
 
 
 class CutpointBinarizer:
+    """
+    CutpointBinarizer
+
+    Implements a cutpoint generation method that is performed per column
+    The base algorithm is subject to change
+
+    Attributes
+    ---------
+    tolerance: float
+    Tolerance for cutpoint generation. A cutpoint will only be generated
+    between two values if they compoundly differ by at least this value. (Default = 1.0)
+    """
+
     def __init__(self, tolerance=1.0):
         self.__cutpoints = []
         self.__tolerance = tolerance
