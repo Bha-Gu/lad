@@ -53,7 +53,7 @@ class MaxPatterns:
                     if tmp:
                         t_c *= 1 - c
 
-                prediction.append(t_c)
+                prediction.append(1 - t_c)
             y.append(np.argmax(np.array(prediction)))
         return pl.Series("label", y)
 
