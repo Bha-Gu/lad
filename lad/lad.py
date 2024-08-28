@@ -37,17 +37,13 @@ class LADClassifier(BaseEstimator, ClassifierMixin):
     ---------
     tolerance: float
         Tolerance for cutpoint generation. A cutpoint will only be generated
-        between two values if they differ by tat least this value. (Default = 0.0)
+        between two values if they differ by tat least this value. (Default = 1.0)
 
-    purity: float
-        Minimum purity requirement for rules. This is an upper bound on the
-        number of points from any another class that are covered by a rule
-        (as a percentage of the total number of points covered by the rule).
-        (Default = 0.95)
+    fp_tolerance: float
+        (Default = 0.5)
 
-    mode: str
-        The algorithm mode used for generating classsification rules. Possible
-        values: {eager, lazy}
+    fn_tolerance: float
+        (Default = 0.5)
     """
 
     def __init__(self, tolerance=1.0, fp_tolerance=0.5, fn_tolerance=0.5):

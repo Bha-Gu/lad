@@ -62,10 +62,7 @@ class CutpointBinarizer:
     def transform(self, X: pl.DataFrame) -> pl.DataFrame:
         Xbin = pl.DataFrame()
 
-        # print(__cutpoints)
         for column_name, (type_val, cutpoints) in zip(X.columns, self.__cutpoints):
-            # cutpoints = cutpoints[cutpoints.columns[0]]
-            # column_name = cutpoints.name
             column = X[column_name]
             if type_val:
                 col = (column <= cutpoints[0]).alias(f"{column_name}<={cutpoints[0]}")
