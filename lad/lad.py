@@ -52,7 +52,7 @@ class LADClassifier(BaseEstimator, ClassifierMixin):
 
     def __handle_labels(self, y: pl.Series):
         self.__labels = y.unique()
-        return y.apply(
+        return y.map_elements(
             lambda s: self.__labels.to_list().index(s), return_dtype=pl.UInt64
         )
 
