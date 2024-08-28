@@ -20,8 +20,6 @@ Logical Analysis of Data (LAD) is a rule-based machine learning algorithm based 
 
 LAD algorithm consists of dectecting hidden patterns capable of distinguishing observations in one class from all the other observations. The patterns are human readable which are used for reasoning of the decisions made by the classifier. 
 
-> A Java implementation of a binary LAD classifier can be found [here](https://lia.ufc.br/~tiberius/lad/downloads.htm).
-
 ### Related publications
  - **Maximum Patterns in Datasets**. Bonates, T.O., P.L. Hammer, A. Kogan. Discrete Applied Mathematics, vol. 156(6), 846-861, 2008. [Link](https://www.sciencedirect.com/science/article/pii/S0166218X07002089)
  
@@ -56,45 +54,31 @@ Please, refer to the [examples.py](examples.py) file for another example.
 
 Choose one of the following in order to install this classifier.
 
-1. Clone this repository and use the setup file to install:
+1. Install it with pip:
 
     ```sh
-    $ git clone https://github.com/vauxgomes/lad.git
+    $ python -m pip install git+https://github.com/Bha-Gu/lad.git#egg=lad
+    ```
+
+2. Clone this repository and use the setup file to install:
+
+    ```sh
+    $ git clone https://github.com/Bha-Gu/lad.git
     ```
     ```sh
     $ sudo python setup.py install
     ```
-
-2. Install it with pip:
-
-    ```sh
-    $ python -m pip install git+https://github.com/vauxgomes/lad.git#egg=lad
-    ```
-
-
-# Versions and tags
-
-| Tag | Description | Algorithms | Status |
-| -- | --  | -- | -- |
-| v0.1 | Uses pandas for processing the data and build decision rules. | MaxPatterns | Published |
-| v0.2 | Uses numpy instead of pandas. | MaxPatterns | Published |
-| v0.3 | The LAD lazy mode | MaxPatterns, LazyMaxPatterns | Published |
-| v0.5 | Using confidence and support to build lazy rules | MaxPatterns, LazyPatterns | Published |
-| v1.0 | Fully documented code | MaxPatterns, LazyMaxPatterns | -- |
-
-> Please refer to the release branch for the latest updates
-
 
 # Citation
 
 In case you want to cite this project:
 
 ```bibtex
-@software{V.S.D. Gomes,
-    author = {Gomes, Vaux Sandino Diniz},
-    month = {4},
+@software{Bha Gu,
+    author = {Bha Gu},
+    month = {7},
     title = {{Logical Analysis of Data a Python Implementation}},
-    version = {1.0.0},
-    year = {2022}
+    version = {0.9.0},
+    year = {2024}
 }
 ```
