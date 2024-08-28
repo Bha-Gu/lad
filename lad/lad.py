@@ -6,7 +6,6 @@ https://scikit-learn.org/stable/developers/develop.html
 https://sklearn-template.readthedocs.io/en/latest/quick_start.html
 """
 
-import numpy as np
 import polars as pl
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
@@ -14,7 +13,6 @@ from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
 from lad.binarizer.cutpoint import CutpointBinarizer
 from lad.featureselection.greedy import GreedySetCover
 from lad.rulegenerator.eager import MaxPatterns
-from lad.rulegenerator.lazy import LazyPatterns
 
 # Docs
 __author__ = "Vaux Gomes"
