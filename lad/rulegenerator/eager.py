@@ -36,7 +36,7 @@ class MaxPatterns:
         self.__binarizer = binarizer
         self.__selector = selector
 
-    def predict(self, X):
+    def predict(self, X: pl.DataFrame) -> pl.Series:
         X = self.__selector.transform(self.__binarizer.transform(X))
         y = []
         columns = X.columns
@@ -50,7 +50,7 @@ class MaxPatterns:
 
                 prediction.append(c if out else -c)
             y.append(np.argmax(np.array(prediction)))
-        return np.array(y)
+        return pl.Series("label", y)
 
     def predict_proba(self, X):
         predictions = self.predict(X)

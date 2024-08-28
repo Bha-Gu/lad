@@ -50,9 +50,17 @@ class LADClassifier(BaseEstimator, ClassifierMixin):
         self.__fn_tolerance = fn_tolerance
         self.model = None
 
+    def __handle_labels(self, y: pl.Series):
+        self.__labels = y.unique()
+        return y.apply(
+            lambda s: self.__labels.to_list().index(s), return_dtype=pl.UInt64
+        )
+
     def fit(self, X: pl.DataFrame, y: pl.Series):
         # X, y = check_X_y(X, y.to_list(), accept_sparse=True)
         self.is_fitted_ = True
+
+        y = self.__handle_labels(y)
 
         print("# Binarization")
         cpb = CutpointBinarizer(self.tolerance)
@@ -80,7 +88,9 @@ class LADClassifier(BaseEstimator, ClassifierMixin):
         # X = check_array(X, accept_sparse=True)
         check_is_fitted(self, "is_fitted_")
 
-        return self.model.predict(X)
+        return self.model.predict(X).apply(
+            lambda x: self.__labels[x], return_dtype=self.__labels.dtype
+        )
 
     def predict_proba(self, X):
         X = check_array(X, accept_sparse=True)
