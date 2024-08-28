@@ -58,14 +58,21 @@ class LADClassifier(BaseEstimator, ClassifierMixin):
         cpb = CutpointBinarizer(self.tolerance)
         Xbin = cpb.fit_transform(X, y)
 
+        print(Xbin.shape)
+        print(Xbin.columns)
+
         print("# Feature Selection")
         gsc = GreedySetCover()
         Xbin = gsc.fit_transform(Xbin, y)
 
+        print(Xbin.shape)
+        print(Xbin.columns)
+
         print("# Rule building")
         self.model = MaxPatterns(cpb, gsc, self.__fp_tolerance, self.__fn_tolerance)
+        rules = self.model.fit(Xbin, y)
 
-        self.model.fit(Xbin, y)
+        print(rules)
 
         return self  # `fit` should always return `self`
 
