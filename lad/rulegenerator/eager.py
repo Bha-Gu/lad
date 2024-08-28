@@ -42,13 +42,18 @@ class MaxPatterns:
         columns = X.columns
         for sample in X.rows():
             prediction = []
-            for i, r in enumerate(self.__rules):
-                out = True
+            for r in self.__rules:
+                out = False
+                t_c = 1.0
                 for c, rule in r:
+                    tmp = True
                     for v, f in rule:
-                        out &= sample[columns.index(f)] == v
+                        tmp &= sample[columns.index(f)] == v
+                    out |= tmp
+                    if tmp:
+                        t_c *= 1 - c
 
-                prediction.append(c if out else -c)
+                prediction.append(t_c)
             y.append(np.argmax(np.array(prediction)))
         return pl.Series("label", y)
 
