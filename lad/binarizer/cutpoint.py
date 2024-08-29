@@ -34,7 +34,8 @@ class CutpointBinarizer:
             if feature == "label":
                 continue
             col = X_tmp.select(pl.col(feature), pl.col("label"))
-            if schema[feature].is_numeric():
+            a = col[feature].n_unique() == 2
+            if schema[feature].is_numeric() and not a:
                 sorted_values = col.sort(feature)
                 delta = sorted_values[feature].diff(null_behavior="drop").sum()
                 tolerance = (
@@ -68,7 +69,10 @@ class CutpointBinarizer:
                     cutpoints.append(sorted_values[feature].mean())
                 self.__cutpoints.append((True, cutpoints))
             else:
-                self.__cutpoints.append((False, col[feature].to_list()))
+                if a:
+                    self.__cutpoints.append((False, [col[feature].unique()[0]]))
+                else:
+                    self.__cutpoints.append((False, col[feature].unique().to_list()))
 
         return self.__cutpoints
 

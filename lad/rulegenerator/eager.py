@@ -20,14 +20,14 @@ class MaxPatterns:
         self,
         binarizer,
         selector,
-        fp_tolerance=0.5,
-        fn_tolerance=0.5,
+        base_precision=0.5,
+        base_recall=0.5,
         max_terms_in_patterns=4,
     ):
         self.__rules = []
 
-        self.__fp_tolerance = fp_tolerance
-        self.__fn_tolerance = fn_tolerance
+        self.__base_precision = base_precision
+        self.__base_recall = base_recall
         self.__max_terms = max_terms_in_patterns
 
         self.__binarizer = binarizer
@@ -107,7 +107,7 @@ class MaxPatterns:
                             filter &= f
                         pos_count_prime = len(X_pos.filter(filter))
 
-                        if self.__fn_tolerance <= 2 * pos_count_prime / len(X_pos):
+                        if self.__base_recall <= 2 * pos_count_prime / len(X_pos):
                             pos_count = len(X_pos.filter(filter))
                             neg_count = len(X_neg.filter(filter))
 
@@ -118,7 +118,7 @@ class MaxPatterns:
                             if base > 0.0:
                                 hd = pos_pct / base
 
-                            if hd >= self.__fp_tolerance:
+                            if hd >= self.__base_precision:
                                 hd *= len(X_pos) + len(X_neg)
                                 hd /= size
                                 prime_patterns.append((hd, possible_next_pattern))

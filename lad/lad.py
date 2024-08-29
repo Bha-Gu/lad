@@ -37,17 +37,18 @@ class LADClassifier(BaseEstimator, ClassifierMixin):
         Tolerance for cutpoint generation. A cutpoint will only be generated
         between two values if they differ by tat least this value. (Default = 1.0)
 
-    fp_tolerance: float
+    base_precision: float
+
         (Default = 0.5)
 
-    fn_tolerance: float
+    base_recall: float
         (Default = 0.5)
     """
 
-    def __init__(self, tolerance=1.0, fp_tolerance=0.5, fn_tolerance=0.5):
+    def __init__(self, tolerance=1.0, base_precision=0.5, base_recall=0.5):
         self.tolerance = tolerance
-        self.__fp_tolerance = fp_tolerance
-        self.__fn_tolerance = fn_tolerance
+        self.__base_precision = base_precision
+        self.__base_recall = base_recall
         self.model = None
 
     def __handle_labels(self, y: pl.Series):
@@ -77,7 +78,7 @@ class LADClassifier(BaseEstimator, ClassifierMixin):
         print(Xbin.columns)
 
         print("# Rule building")
-        self.model = MaxPatterns(cpb, gsc, self.__fp_tolerance, self.__fn_tolerance)
+        self.model = MaxPatterns(cpb, gsc, self.__base_precision, self.__base_recall)
         rules = self.model.fit(Xbin, y)
 
         print(rules)

@@ -1,2 +1,2 @@
-sklearn>=0.23.0
 polars>=1.0.0
+sklearn>=0.23.0
