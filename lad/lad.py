@@ -1,25 +1,17 @@
 #!/usr/bin/env python
 
-"""
-References:
-https://scikit-learn.org/stable/developers/develop.html
-https://sklearn-template.readthedocs.io/en/latest/quick_start.html
-"""
-
 import polars as pl
-from sklearn.base import BaseEstimator, ClassifierMixin
-from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
 
 from lad.binarizer.cutpoint import CutpointBinarizer
 from lad.featureselection.greedy import GreedySetCover
 from lad.rulegenerator.eager import MaxPatterns
 
 # Docs
-__author__ = "Vaux Gomes"
-__version__ = "0.4"
+__author__ = "Bha Gu"
+__version__ = "0.9"
 
 
-class LADClassifier(BaseEstimator, ClassifierMixin):
+class LADClassifier:
     """
     LAD Classifier
 
@@ -58,7 +50,6 @@ class LADClassifier(BaseEstimator, ClassifierMixin):
         )
 
     def fit(self, X: pl.DataFrame, y: pl.Series):
-        # X, y = check_X_y(X, y.to_list(), accept_sparse=True)
         self.is_fitted_ = True
 
         y = self.__handle_labels(y)
@@ -86,17 +77,11 @@ class LADClassifier(BaseEstimator, ClassifierMixin):
         return self  # `fit` should always return `self`
 
     def predict(self, X):
-        # X = check_array(X, accept_sparse=True)
-        check_is_fitted(self, "is_fitted_")
-
         return self.model.predict(X).map_elements(
             lambda x: self.__labels[x], return_dtype=self.__labels.dtype
         )
 
     def predict_proba(self, X):
-        X = check_array(X, accept_sparse=True)
-        check_is_fitted(self, "is_fitted_")
-
         return self.model.predict_proba(X)
 
     def __str__(self):
