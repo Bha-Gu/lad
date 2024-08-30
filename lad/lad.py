@@ -56,14 +56,11 @@ class LADClassifier:
 
         print("# Binarization")
         cpb = CutpointBinarizer(self.tolerance)
-        Xbin = cpb.fit_transform(X, y)
-
-        print(Xbin.shape)
-        print(Xbin.columns)
+        cp = cpb.fit(X, y)
 
         print("# Feature Selection")
-        gsc = GreedySetCover()
-        Xbin = gsc.fit_transform(Xbin, y)
+        gsc = GreedySetCover(cpb)
+        Xbin = gsc.fit_transform(X, y)
 
         print(Xbin.shape)
         print(Xbin.columns)

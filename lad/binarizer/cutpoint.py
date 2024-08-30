@@ -30,6 +30,9 @@ class CutpointBinarizer:
         schema = X.schema
         # print(schema)
         features = X.columns
+        self.__cp__idx = pl.DataFrame(
+            [[i for i in range(len(features))]], schema=schema, orient="row"
+        )
         for feature in features:
             if feature == "label":
                 continue
@@ -76,31 +79,48 @@ class CutpointBinarizer:
 
         return self.__cutpoints
 
-    def transform(self, X: pl.DataFrame) -> pl.DataFrame:
+    def transform_column(self, col: pl.Series, filter=None) -> pl.DataFrame:
         Xbin = pl.DataFrame()
+        column_name = col.name
+        (type_val, cutpoints) = self.__cutpoints[self.__cp__idx[column_name][0]]
+        if type_val:
+            name = f"{column_name}<={cutpoints[0]}"
+            c = (col <= cutpoints[0]).alias(name)
+            if filter is None or name in filter:
+                Xbin = Xbin.hstack([c])
 
-        for column_name, (type_val, cutpoints) in zip(X.columns, self.__cutpoints):
-            column = X[column_name]
-            if type_val:
-                col = (column <= cutpoints[0]).alias(f"{column_name}<={cutpoints[0]}")
-                Xbin = Xbin.hstack([col])
+            length = len(cutpoints)
+            for i in range(length - 1):
+                j = i + 1
+                name = f"{column_name}->({cutpoints[i]}<->{cutpoints[j]})"
+                c = ((col > cutpoints[i]) & (col <= cutpoints[j])).alias(name)
 
-                length = len(cutpoints)
-                for i in range(length - 1):
-                    j = i + 1
-                    col = ((column > cutpoints[i]) & (column <= cutpoints[j])).alias(
-                        f"{column_name}->({cutpoints[i]}<->{cutpoints[j]})"
-                    )
-                    Xbin = Xbin.hstack([col])
+                if filter is None or name in filter:
+                    Xbin = Xbin.hstack([c])
 
-                col = (cutpoints[-1] <= column).alias(f"{cutpoints[-1]}<={column_name}")
-                Xbin = Xbin.hstack([col])
-            else:
-                for value in cutpoints:
-                    col = (column == value).alias(f"{column_name}={value}")
-                    Xbin = Xbin.hstack([col])
+            name = f"{cutpoints[length - 1]}<={column_name}"
+            c = (cutpoints[length - 1] <= col).alias(name)
+
+            if filter is None or name in filter:
+                Xbin = Xbin.hstack([c])
+        else:
+            for value in cutpoints:
+                name = f"{column_name}={value}"
+                c = (col == value).alias(name)
+
+                if filter is None or name in filter:
+                    Xbin = Xbin.hstack([c])
 
         return Xbin
+
+    def transform(self, X: pl.DataFrame, filter=None) -> pl.DataFrame:
+        Xbin = []
+
+        for column_name in X.columns:
+            column = X[column_name]
+            Xbin.append(self.transform_column(column, filter))
+
+        return pl.concat(Xbin, how="horizontal")
 
     def fit_transform(self, X, y):
         self.fit(X, y)
