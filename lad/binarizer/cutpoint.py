@@ -31,7 +31,9 @@ class CutpointBinarizer:
         # print(schema)
         features = X.columns
         self.__cp__idx = pl.DataFrame(
-            [[i for i in range(len(features))]], schema=schema, orient="row"
+            [[i for i in range(len(features))]],
+            schema={name: pl.Int64 for name in features},
+            orient="row",
         )
         print(self.__cp__idx)
         for feature in features:
