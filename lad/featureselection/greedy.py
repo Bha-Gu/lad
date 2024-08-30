@@ -67,7 +67,6 @@ class GreedySetCover:
             df = self.__binarizer.transform_column(Xbin[feature])
             columns = df.columns
             rejected = self.__check_column_quality(df.hstack([y_series]))
-            del df
             for i, f in enumerate(columns):
                 if not rejected[i]:
                     self.__selected.append(f)
