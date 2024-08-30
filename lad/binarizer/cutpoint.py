@@ -33,6 +33,7 @@ class CutpointBinarizer:
         self.__cp__idx = pl.DataFrame(
             [[i for i in range(len(features))]], schema=schema, orient="row"
         )
+        print(self.__cp__idx)
         for feature in features:
             if feature == "label":
                 continue
