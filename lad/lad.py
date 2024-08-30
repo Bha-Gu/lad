@@ -62,6 +62,8 @@ class LADClassifier:
         gsc = GreedySetCover(cpb)
         Xbin = gsc.fit_transform(X, y)
 
+        del X
+
         print(Xbin.shape)
         print(Xbin.columns)
 

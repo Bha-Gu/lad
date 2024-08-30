@@ -19,9 +19,8 @@ class GreedySetCover:
     def get_selected(self):
         return pl.Series("Selected", self.__selected)
 
-    def __check_column_quality(self, col_y: pl.DataFrame) -> pl.Series:
+    def __check_column_quality(self, df: pl.DataFrame) -> pl.Series:
         class_count = len(self.__labels)
-        df = col_y
         total = df.group_by("label", maintain_order=True).sum().drop("label")
         y_t = (
             df.group_by("label", maintain_order=True)
@@ -29,6 +28,8 @@ class GreedySetCover:
             .select([pl.col("len").alias("y_t")])
             .to_series()
         )
+
+        del df
 
         T = total.sum()
         final = T * y_t.sum()
@@ -67,7 +68,7 @@ class GreedySetCover:
             df = self.__binarizer.transform_column(Xbin[feature])
             columns = df.columns
             rejected = self.__check_column_quality(df.hstack([y_series]))
-            print(feature, rejected)
+            del df
             for i, f in enumerate(columns):
                 if not rejected[i]:
                     self.__selected.append(f)

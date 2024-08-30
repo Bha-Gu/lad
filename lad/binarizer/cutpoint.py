@@ -91,7 +91,7 @@ class CutpointBinarizer:
             c = (col <= cutpoints[0]).alias(name)
             if filter is None or name in filter:
                 Xbin = Xbin.hstack([c])
-
+            del c
             length = len(cutpoints)
             for i in range(length - 1):
                 j = i + 1
@@ -100,12 +100,14 @@ class CutpointBinarizer:
 
                 if filter is None or name in filter:
                     Xbin = Xbin.hstack([c])
+                del c
 
             name = f"{cutpoints[length - 1]}<={column_name}"
             c = (cutpoints[length - 1] <= col).alias(name)
 
             if filter is None or name in filter:
                 Xbin = Xbin.hstack([c])
+            del c
         else:
             for value in cutpoints:
                 name = f"{column_name}={value}"
@@ -113,6 +115,7 @@ class CutpointBinarizer:
 
                 if filter is None or name in filter:
                     Xbin = Xbin.hstack([c])
+                del c
 
         return Xbin
 
@@ -121,7 +124,10 @@ class CutpointBinarizer:
 
         for column_name in X.columns:
             column = X[column_name]
-            pl.concat([Xbin, self.transform_column(column, filter)], how="horizontal")
+            Xbin = pl.concat(
+                [Xbin, self.transform_column(column, filter)], how="horizontal"
+            )
+            del column
 
         return Xbin
 
