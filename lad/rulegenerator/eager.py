@@ -18,7 +18,6 @@ class MaxPatterns:
 
     def __init__(
         self,
-        binarizer,
         selector,
         base_precision=0.5,
         base_recall=0.5,
@@ -30,11 +29,10 @@ class MaxPatterns:
         self.__base_recall = base_recall
         self.__max_terms = max_terms_in_patterns
 
-        self.__binarizer = binarizer
         self.__selector = selector
 
     def predict(self, X: pl.DataFrame) -> pl.Series:
-        X = self.__selector.transform(self.__binarizer.transform(X))
+        X = self.__selector.transform(X)
         y = []
         columns = X.columns
         for sample in X.rows():

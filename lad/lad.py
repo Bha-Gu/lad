@@ -68,7 +68,7 @@ class LADClassifier:
         print(Xbin.columns)
 
         print("# Rule building")
-        self.model = MaxPatterns(cpb, gsc, self.__base_precision, self.__base_recall)
+        self.model = MaxPatterns(gsc, self.__base_precision, self.__base_recall)
         rules = self.model.fit(Xbin, y)
 
         print(rules)
