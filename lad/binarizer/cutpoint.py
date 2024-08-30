@@ -122,7 +122,6 @@ class CutpointBinarizer:
         for column_name in X.columns:
             column = X[column_name]
             pl.concat([Xbin, self.transform_column(column, filter)], how="horizontal")
-            del column
 
         return Xbin
 
