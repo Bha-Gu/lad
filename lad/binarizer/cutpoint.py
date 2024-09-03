@@ -75,7 +75,7 @@ class CutpointBinarizer:
                 sorted_values: pl.DataFrame = col_y.sort(feature)
                 delta: float = sorted_values[feature].diff(null_behavior="drop").sum()
                 tolerance: float = delta / (len(sorted_values) - 1)
-                cutpoints: list[float] = []
+                cutpoints: set[float] = set()
                 prev_cutpoint: float | None = None
                 first_cutpoint: bool = False
                 prev_labels: set[str] = set()
@@ -103,10 +103,11 @@ class CutpointBinarizer:
                                     ) = (X[feature] <= cp).alias(name)
                                     if self.test(col, y):
                                         self.__selected.add(name)
+                                        cutpoints.add(cp)
                                     first_cutpoint = False
                                 else:
                                     # fmt: off
-                                    name: str = f"{prev_cutpoint}<={feature}<{cp}"# pyright: ignore [reportRedeclaration]
+                                    name: str = f"{prev_cutpoint}<={feature}<{cp}" # pyright: ignore [reportRedeclaration]
 
                                     col: pl.Series = ( # pyright: ignore [reportRedeclaration]
                                         (X[feature] <= cp)
@@ -115,7 +116,12 @@ class CutpointBinarizer:
                                     # fmt: on
                                     if self.test(col, y):
                                         self.__selected.add(name)
-                                cutpoints.append(cp)
+                                        cutpoints.add(cp)
+                                        (
+                                            cutpoints.add(prev_cutpoint)
+                                            if prev_cutpoint is not None
+                                            else None
+                                        )
                                 prev_cutpoint = cp
                                 prev_labels = labels
                                 labels = set()
@@ -124,8 +130,8 @@ class CutpointBinarizer:
                         prev_cutpoint = value
                         first_cutpoint = True
                     prev_value = value
-                name: str = f"{prev_cutpoint}<{feature}"
-                col: pl.Series = (X[feature] > prev_cutpoint).alias(name)
+                name: str = f"{prev_cutpoint}<{feature}"  # pyright: ignore [reportRedeclaration]
+                col: pl.Series = (X[feature] > prev_cutpoint).alias(name)  # pyright: ignore [reportRedeclaration]
                 if self.test(col, y):
                     self.__selected.add(name)
 
@@ -137,10 +143,18 @@ class CutpointBinarizer:
                         print("Error at error check 1")
                         cp = 0.0
 
-                    cutpoints.append(cp)
-                self.__cutpoints.append((True, cutpoints))
+                    cutpoints.add(cp)
+                self.__cutpoints.append((True, sorted(cutpoints)))
             else:
-                self.__cutpoints.append((False, col_y[feature].unique().to_list()))
+                values = col_y[feature].unique().to_list()
+                cps = []
+                for value in values:
+                    name: str = f"{feature}={value}"
+                    col: pl.Series = (X[feature] == value).alias(name)
+                    if self.test(col, y):
+                        self.__selected.add(name)
+                        cps.append(name)
+                self.__cutpoints.append((False, cps))
         return (self.__cutpoints, self.__selected)
 
     def transform(self, X: pl.DataFrame, filter=None) -> pl.DataFrame:
