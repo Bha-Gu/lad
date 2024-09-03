@@ -2,6 +2,9 @@ import copy
 
 import polars as pl
 
+from lad.binarizer.cutpoint import CutpointBinarizer
+from lad.featureselection.greedy import GreedySetCover
+
 
 class MaxPatterns:
     """
@@ -18,10 +21,11 @@ class MaxPatterns:
 
     def __init__(
         self,
-        selector,
-        base_precision=0.5,
-        base_recall=0.5,
-        max_terms_in_patterns=4,
+        binarizer: CutpointBinarizer,
+        selector: GreedySetCover,
+        base_precision: float = 0.5,
+        base_recall: float = 0.5,
+        max_terms_in_patterns: int = 4,
     ):
         self.__rules = []
 
@@ -29,10 +33,15 @@ class MaxPatterns:
         self.__base_recall = base_recall
         self.__max_terms = max_terms_in_patterns
 
+        self.__binarizer = binarizer
         self.__selector = selector
 
     def predict(self, X: pl.DataFrame) -> pl.Series:
-        X = self.__selector.transform(X)
+        proba = self.predict_proba(X)
+        return pl.Series([pl.Series(i).arg_max() for i in proba])
+
+    def predict_proba(self, X: pl.DataFrame) -> list[list[float]]:
+        X = self.__selector.transform(self.__binarizer.transform(X))
         y = []
         columns = X.columns
         for sample in X.rows():
@@ -49,11 +58,8 @@ class MaxPatterns:
                         t_c *= 1 - c
 
                 prediction.append(1 - t_c)
-            y.append((pl.Series(prediction)).arg_max())
-        return pl.Series("label", y)
-
-    def predict_proba(self, X):
-        pass
+            y.append(prediction)
+        return y
 
     def __base_fit(self, X_pos: pl.DataFrame, X_neg: pl.DataFrame, feature_count):
         size = X_pos.shape[0] + X_neg.shape[0]
