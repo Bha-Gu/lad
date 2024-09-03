@@ -69,6 +69,7 @@ class CutpointBinarizer:
         features = X.columns
 
         for feature in features:
+            print(feature)
             col_y: pl.DataFrame = pl.DataFrame([X[feature], y])
             if schema[feature].is_numeric():
                 sorted_values: pl.DataFrame = col_y.sort(feature)
@@ -139,13 +140,14 @@ class CutpointBinarizer:
                     cutpoints.append(cp)
                 self.__cutpoints.append((True, cutpoints))
             else:
-                self.__cutpoints.append((False, col_y[feature].to_list()))
+                self.__cutpoints.append((False, col_y[feature].unique().to_list()))
         return (self.__cutpoints, self.__selected)
 
     def transform(self, X: pl.DataFrame, filter=None) -> pl.DataFrame:
         Xbin = pl.DataFrame()
-
+        print("# Transform")
         for column_name, (type_val, cutpoints) in zip(X.columns, self.__cutpoints):
+            print(column_name)
             column: pl.Series = X[column_name]
             if type_val:
                 name: str = f"{column_name}<={cutpoints[0]}"
