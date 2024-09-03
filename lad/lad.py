@@ -59,7 +59,7 @@ class LADClassifier:
         cp = cpb.fit(X, y)
 
         print("# Feature Selection")
-        gsc = GreedySetCover(cpb)
+        gsc = GreedySetCover()
         Xbin = gsc.fit_transform(X, y)
 
         del X

@@ -16,118 +16,160 @@ class CutpointBinarizer:
     between two values if they compoundly differ by at least this value. (Default = 1.0)
     """
 
-    def __init__(self, tolerance=1.0):
+    def __init__(self, bin_size=1.0):
         self.__cutpoints = []
-        self.__tolerance = tolerance
+        self.__bin_size: float = bin_size
 
     def get_cutpoints(self):
         return self.__cutpoints
 
-    def fit(self, X: pl.DataFrame, y: pl.Series):
-        self.__cutpoints = []
-        self.__tolerance = 1.0
-        X_tmp = X.hstack([y])
-        schema = X.schema
-        # print(schema)
-        features = X.columns
-        self.__cp__idx = pl.DataFrame(
-            [[i for i in range(len(features))]],
-            schema={name: pl.Int64 for name in features},
-            orient="row",
+    def test(self, col: pl.Series, y: pl.Series) -> bool:
+        labels: list[int] = y.unique().sort().to_list()
+        class_count: int = len(labels)
+        df = pl.DataFrame([col, y])
+        total: pl.Series = df.group_by("label", maintain_order=True).sum()[col.name]
+
+        y_t: pl.Series = (
+            df.group_by("label", maintain_order=True)
+            .len()
+            .select([pl.col("len").alias("y_t")])
+            .to_series()
         )
-        print(self.__cp__idx)
+
+        T: float = total.sum()
+        # Initialize the final array
+        final: float = T * y_t.sum()
+
+        for classs in range(class_count):
+            tc: float = total[classs]
+            final -= y_t[classs] * tc
+            for subclass in range(classs + 1, class_count):
+                final -= 2 * tc * total[subclass]
+
+        y_t_sorted: list[int] = y_t.to_list()
+        y_t_sorted.sort()
+
+        while len(y_t_sorted) > 2:
+            y_t_sorted[0] = y_t_sorted[0] + y_t_sorted[1]
+            y_t_sorted.pop(1)
+            y_t_sorted.sort()
+
+        upper_bound: int = y_t_sorted[0] * y_t_sorted[1]
+
+        normalized_final: float = final / upper_bound if upper_bound != 0 else 0
+
+        passed: bool = normalized_final > 1 / class_count
+
+        return passed
+
+    def fit(self, X: pl.DataFrame, y: pl.Series):
+        self.__cutpoints: list[tuple[bool, list[float] | list[str]]] = []
+        self.__selected: set[str] = set()
+        schema = X.schema
+        features = X.columns
+
         for feature in features:
-            if feature == "label":
-                continue
-            col = X_tmp.select(pl.col(feature), pl.col("label"))
-            a = col[feature].n_unique() == 2
-            if schema[feature].is_numeric() and not a:
-                sorted_values = col.sort(feature)
-                delta = sorted_values[feature].diff(null_behavior="drop").sum()
-                tolerance = (
-                    delta / len(sorted_values) if len(sorted_values) > 2 else 0.0
-                )
-                cutpoints = []
-                prev_labels = None
-                prev_value = None
-                count = 1
-                labels = set()
+            col_y: pl.DataFrame = pl.DataFrame([X[feature], y])
+            if schema[feature].is_numeric():
+                sorted_values: pl.DataFrame = col_y.sort(feature)
+                delta: float = sorted_values[feature].diff(null_behavior="drop").sum()
+                tolerance: float = delta / (len(sorted_values) - 1)
+                cutpoints: list[float] = []
+                prev_cutpoint: float | None = None
+                first_cutpoint: bool = False
+                prev_labels: set[str] = set()
+                prev_value: float | None = None
+                labels: set[str] = set()
 
                 for value, label in sorted_values.rows():
-                    if value != prev_value:
-                        labels = set()
                     labels.add(label)
 
-                    if prev_labels is not None:
-                        variation = value - prev_value
-                        if variation > tolerance * self.__tolerance / count:
+                    if prev_value is not None:
+                        variation: float = value - prev_cutpoint
+                        if variation > tolerance * self.__bin_size:
                             if (
                                 len(prev_labels) > 1 or len(labels) > 1
                             ) or prev_labels != labels:
-                                count = 0
-                                cutpoints.append(prev_value + variation / 2.0)
+                                cp: float = (  # pyright: ignore [reportRedeclaration]
+                                    prev_value + (value - prev_value) / 2.0
+                                )
+                                if first_cutpoint:
+                                    name: (  # pyright: ignore [reportRedeclaration]
+                                        str
+                                    ) = f"{feature}<={cp}"
+                                    col: (  # pyright: ignore [reportRedeclaration]
+                                        pl.Series
+                                    ) = (X[feature] <= cp).alias(name)
+                                    if self.test(col, y):
+                                        self.__selected.add(name)
+                                    first_cutpoint = False
+                                else:
+                                    # fmt: off
+                                    name: str = f"{prev_cutpoint}<={feature}<{cp}"# pyright: ignore [reportRedeclaration]
 
-                        count += 1
+                                    col: pl.Series = ( # pyright: ignore [reportRedeclaration]
+                                        (X[feature] <= cp)
+                                        & (X[feature] > prev_cutpoint)
+                                    ).alias(name)
+                                    # fmt: on
+                                    if self.test(col, y):
+                                        self.__selected.add(name)
+                                cutpoints.append(cp)
+                                prev_cutpoint = cp
+                                prev_labels = labels
+                                labels = set()
 
-                    prev_labels = labels
+                    if prev_cutpoint is None:
+                        prev_cutpoint = value
+                        first_cutpoint = True
                     prev_value = value
+                name: str = f"{prev_cutpoint}<{feature}"
+                col: pl.Series = (X[feature] > prev_cutpoint).alias(name)
+                if self.test(col, y):
+                    self.__selected.add(name)
+
                 if len(cutpoints) == 0:
-                    cutpoints.append(sorted_values[feature].mean())
+                    cp_tmp = sorted_values[feature].mean()
+                    try:
+                        cp = float(str(cp_tmp)) if cp_tmp is not None else 0.0
+                    except (ValueError, TypeError):
+                        print("Error at error check 1")
+                        cp = 0.0
+
+                    cutpoints.append(cp)
                 self.__cutpoints.append((True, cutpoints))
             else:
-                if a:
-                    self.__cutpoints.append((False, [col[feature].unique()[0]]))
-                else:
-                    self.__cutpoints.append((False, col[feature].unique().to_list()))
-
-        return self.__cutpoints
-
-    def transform_column(self, col: pl.Series, filter=None) -> pl.DataFrame:
-        Xbin = pl.DataFrame()
-        column_name = col.name
-        (type_val, cutpoints) = self.__cutpoints[self.__cp__idx[column_name][0]]
-        if type_val:
-            name = f"{column_name}<={cutpoints[0]}"
-            c = (col <= cutpoints[0]).alias(name)
-            if filter is None or name in filter:
-                Xbin = Xbin.hstack([c])
-            del c
-            length = len(cutpoints)
-            for i in range(length - 1):
-                j = i + 1
-                name = f"{column_name}->({cutpoints[i]}<->{cutpoints[j]})"
-                c = ((col > cutpoints[i]) & (col <= cutpoints[j])).alias(name)
-
-                if filter is None or name in filter:
-                    Xbin = Xbin.hstack([c])
-                del c
-
-            name = f"{cutpoints[length - 1]}<={column_name}"
-            c = (cutpoints[length - 1] <= col).alias(name)
-
-            if filter is None or name in filter:
-                Xbin = Xbin.hstack([c])
-            del c
-        else:
-            for value in cutpoints:
-                name = f"{column_name}={value}"
-                c = (col == value).alias(name)
-
-                if filter is None or name in filter:
-                    Xbin = Xbin.hstack([c])
-                del c
-
-        return Xbin
+                self.__cutpoints.append((False, col_y[feature].to_list()))
+        return (self.__cutpoints, self.__selected)
 
     def transform(self, X: pl.DataFrame, filter=None) -> pl.DataFrame:
         Xbin = pl.DataFrame()
 
-        for column_name in X.columns:
-            column = X[column_name]
-            Xbin = pl.concat(
-                [Xbin, self.transform_column(column, filter)], how="horizontal"
-            )
-            del column
+        for column_name, (type_val, cutpoints) in zip(X.columns, self.__cutpoints):
+            column: pl.Series = X[column_name]
+            if type_val:
+                name: str = f"{column_name}<={cutpoints[0]}"
+                col: pl.Series = (column <= cutpoints[0]).alias(name)
+                if name in self.__selected:
+                    Xbin = Xbin.hstack([col])
+
+                length: int = len(cutpoints)
+                for i in range(length - 1):
+                    j = i + 1
+                    name = f"{cutpoints[i]}<={column_name}<{cutpoints[j]}"
+                    col = ((column > cutpoints[i]) & (column <= cutpoints[j])).alias(
+                        name
+                    )
+                    if name in self.__selected:
+                        Xbin = Xbin.hstack([col])
+                name = f"{cutpoints[-1]}<{column_name}"
+                col = (cutpoints[-1] <= column).alias(name)
+                if name in self.__selected:
+                    Xbin = Xbin.hstack([col])
+            else:
+                for value in cutpoints:
+                    col = (column == value).alias(f"{column_name}={value}")
+                    Xbin = Xbin.hstack([col])
 
         return Xbin
 

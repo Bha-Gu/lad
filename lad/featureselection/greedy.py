@@ -1,7 +1,5 @@
 import polars as pl
 
-from lad.binarizer.cutpoint import CutpointBinarizer
-
 
 class GreedySetCover:
     """
@@ -11,72 +9,35 @@ class GreedySetCover:
     Threshold is based of class count (subject to change)
     """
 
-    def __init__(self, binarizer: CutpointBinarizer):
-        self.__selected = []
-        self.__labels = []
-        self.__binarizer = binarizer
+    def __init__(self):
+        self.__removed = []
 
-    def get_selected(self):
-        return pl.Series("Selected", self.__selected)
-
-    def __check_column_quality(self, df: pl.DataFrame) -> pl.Series:
-        class_count = len(self.__labels)
-        total = df.group_by("label", maintain_order=True).sum().drop("label")
-        y_t = (
-            df.group_by("label", maintain_order=True)
-            .len()
-            .select([pl.col("len").alias("y_t")])
-            .to_series()
-        )
-
-        del df
-
-        T = total.sum()
-        final = T * y_t.sum()
-
-        for classs in range(class_count):
-            tc = total[classs]
-            final -= y_t[classs] * tc
-            for subclass in range(classs + 1, class_count):
-                final -= 2 * tc * total[subclass]
-
-        # Calculate upper bound as per your described method
-        y_t_sorted = y_t.to_list()
-        y_t_sorted.sort()
-
-        while len(y_t_sorted) > 2:
-            y_t_sorted[0] = y_t_sorted[0] + y_t_sorted[1]
-            y_t_sorted.pop(1)
-            y_t_sorted.sort()
-
-        upper_bound = y_t_sorted[0] * y_t_sorted[1]
-
-        final = pl.Series(final.row(0)) / upper_bound
-
-        return final <= 1 / class_count
+    def get_removed(self):
+        return pl.Series("Selected", self.__removed)
 
     def fit(self, Xbin: pl.DataFrame, y: pl.Series):
-        self.__selected = []
+        features = Xbin.columns
+        feature_count: int = len(features)
 
-        Xbin_prune = Xbin
-        y_series = y
-        features = Xbin_prune.columns
+        for i in range(feature_count):
+            if i in self.__removed:
+                continue
+            current_col: pl.Series = Xbin[features[i]]
 
-        self.__labels = y.unique().sort().to_list()
+            for j in range(i + 1, feature_count):
+                if j in self.__removed:
+                    continue
+                comparison_col: pl.Series = Xbin[features[j]]
 
-        for feature in features:
-            df = self.__binarizer.transform_column(Xbin[feature])
-            columns = df.columns
-            rejected = self.__check_column_quality(df.hstack([y_series]))
-            del df
-            for i, f in enumerate(columns):
-                if not rejected[i]:
-                    self.__selected.append(f)
+                # Vectorized XOR and NOT operations
+                a: pl.Series = current_col ^ comparison_col  # XOR operation
+                b: pl.Series = ~a  # NOT XOR
 
-        return self.__selected
+                if a.all() or b.all():
+                    self.__removed.append(j)
 
     def transform(self, X: pl.DataFrame):
-        return self.__binarizer.transform(X, filter=self.__selected)
+        return X.select(pl.col("*").exclude([X.columns[i] for i in self.__removed]))
 
     def fit_transform(self, Xbin, y):
         self.fit(Xbin, y)
