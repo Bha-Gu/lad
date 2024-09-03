@@ -43,6 +43,7 @@ class LADClassifier:
         base_precision: float = 0.5,
         base_recall: float = 0.5,
         max_terms_in_patterns: int = 4,
+        in_place: bool = False,
     ):
         self.bin_size = bin_size
         self.__base_precision = base_precision
@@ -66,7 +67,7 @@ class LADClassifier:
         y = self.__handle_labels(y)
 
         print("# Binarization")
-        cpb = CutpointBinarizer(self.bin_size)
+        cpb = CutpointBinarizer(self.bin_size, in_place=self.__inplace)
         Xbin = cpb.fit_transform(X, y)
 
         print("# Feature Selection")

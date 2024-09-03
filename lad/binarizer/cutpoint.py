@@ -16,9 +16,10 @@ class CutpointBinarizer:
     between two values if they compoundly differ by at least this value. (Default = 1.0)
     """
 
-    def __init__(self, bin_size=1.0):
+    def __init__(self, bin_size: float = 1.0, in_place: bool = False):
         self.__cutpoints = []
         self.__bin_size: float = bin_size
+        self.__inplace = in_place
 
     def get_cutpoints(self):
         return self.__cutpoints
@@ -63,8 +64,10 @@ class CutpointBinarizer:
         return passed
 
     def fit(self, X: pl.DataFrame, y: pl.Series):
-        self.__cutpoints: list[tuple[bool, list[float] | list[str]]] = []
-        self.__selected: set[str] = set()
+        self.__cutpoints: list[  # pyright: ignore [reportRedeclaration]
+            tuple[bool, list[float] | list[str]]
+        ] = []
+        self.__selected: set[str] = set()  # pyright: ignore [reportRedeclaration]
         schema = X.schema
         features = X.columns
 
@@ -100,7 +103,7 @@ class CutpointBinarizer:
                                     ) = f"{feature}<={cp}"
                                     col: (  # pyright: ignore [reportRedeclaration]
                                         pl.Series
-                                    ) = (X[feature] <= cp).alias(name)
+                                    ) = (col_y[feature] <= cp).alias(name)
                                     if self.test(col, y):
                                         self.__selected.add(name)
                                         cutpoints.add(cp)
@@ -110,8 +113,8 @@ class CutpointBinarizer:
                                     name: str = f"{prev_cutpoint}<={feature}<{cp}" # pyright: ignore [reportRedeclaration]
 
                                     col: pl.Series = ( # pyright: ignore [reportRedeclaration]
-                                        (X[feature] <= cp)
-                                        & (X[feature] > prev_cutpoint)
+                                        (col_y[feature] <= cp)
+                                        & (col_y[feature] > prev_cutpoint)
                                     ).alias(name)
                                     # fmt: on
                                     if self.test(col, y):
@@ -130,8 +133,12 @@ class CutpointBinarizer:
                         prev_cutpoint = value
                         first_cutpoint = True
                     prev_value = value
-                name: str = f"{prev_cutpoint}<{feature}"  # pyright: ignore [reportRedeclaration]
-                col: pl.Series = (X[feature] > prev_cutpoint).alias(name)  # pyright: ignore [reportRedeclaration]
+                name: str = (  # pyright: ignore [reportRedeclaration]
+                    f"{prev_cutpoint}<{feature}"
+                )
+                col: pl.Series = (  # pyright: ignore [reportRedeclaration]
+                    X[feature] > prev_cutpoint
+                ).alias(name)
                 if self.test(col, y):
                     self.__selected.add(name)
 
@@ -150,19 +157,21 @@ class CutpointBinarizer:
                 cps = []
                 for value in values:
                     name: str = f"{feature}={value}"
-                    col: pl.Series = (X[feature] == value).alias(name)
+                    col: pl.Series = (col_y[feature] == value).alias(name)
                     if self.test(col, y):
                         self.__selected.add(name)
                         cps.append(name)
                 self.__cutpoints.append((False, cps))
         return (self.__cutpoints, self.__selected)
 
-    def transform(self, X: pl.DataFrame, filter=None) -> pl.DataFrame:
+    def transform(self, X: pl.DataFrame) -> pl.DataFrame:
         Xbin = pl.DataFrame()
         print("# Transform")
         for column_name, (type_val, cutpoints) in zip(X.columns, self.__cutpoints):
             print(column_name)
-            column: pl.Series = X[column_name]
+            column: pl.Series = (
+                X.drop_in_place(column_name) if self.__inplace else X[column_name]
+            )
             if type_val:
                 name: str = f"{column_name}<={cutpoints[0]}"
                 col: pl.Series = (column <= cutpoints[0]).alias(name)
@@ -189,6 +198,106 @@ class CutpointBinarizer:
 
         return Xbin
 
-    def fit_transform(self, X, y):
-        self.fit(X, y)
-        return self.transform(X)
+    def fit_transform(self, X: pl.DataFrame, y: pl.Series) -> pl.DataFrame:
+        self.__cutpoints: list[tuple[bool, list[float] | list[str]]] = []
+        self.__selected: set[str] = set()
+        schema = X.schema
+        features = X.columns
+        Xbin = pl.DataFrame()
+
+        for feature in features:
+            print(feature)
+            col_y: pl.DataFrame = pl.DataFrame([X[feature], y])
+            if schema[feature].is_numeric():
+                sorted_values: pl.DataFrame = col_y.sort(feature)
+                delta: float = sorted_values[feature].diff(null_behavior="drop").sum()
+                tolerance: float = delta / (len(sorted_values) - 1)
+                cutpoints: set[float] = set()
+                prev_cutpoint: float | None = None
+                first_cutpoint: bool = False
+                prev_labels: set[str] = set()
+                prev_value: float | None = None
+                labels: set[str] = set()
+
+                for value, label in sorted_values.rows():
+                    labels.add(label)
+
+                    if prev_value is not None:
+                        variation: float = value - prev_cutpoint
+                        if variation > tolerance * self.__bin_size:
+                            if (
+                                len(prev_labels) > 1 or len(labels) > 1
+                            ) or prev_labels != labels:
+                                cp: float = (  # pyright: ignore [reportRedeclaration]
+                                    prev_value + (value - prev_value) / 2.0
+                                )
+                                if first_cutpoint:
+                                    name: (  # pyright: ignore [reportRedeclaration]
+                                        str
+                                    ) = f"{feature}<={cp}"
+                                    col: (  # pyright: ignore [reportRedeclaration]
+                                        pl.Series
+                                    ) = (col_y[feature] <= cp).alias(name)
+                                    if self.test(col, y):
+                                        self.__selected.add(name)
+                                        Xbin = Xbin.hstack([col])
+                                        cutpoints.add(cp)
+                                    first_cutpoint = False
+                                else:
+                                    # fmt: off
+                                    name: str = f"{prev_cutpoint}<={feature}<{cp}" # pyright: ignore [reportRedeclaration]
+
+                                    col: pl.Series = ( # pyright: ignore [reportRedeclaration]
+                                        (col_y[feature] <= cp)
+                                        & (col_y[feature] > prev_cutpoint)
+                                    ).alias(name)
+                                    # fmt: on
+                                    if self.test(col, y):
+                                        self.__selected.add(name)
+                                        Xbin = Xbin.hstack([col])
+                                        cutpoints.add(cp)
+                                        (
+                                            cutpoints.add(prev_cutpoint)
+                                            if prev_cutpoint is not None
+                                            else None
+                                        )
+                                prev_cutpoint = cp
+                                prev_labels = labels
+                                labels = set()
+
+                    if prev_cutpoint is None:
+                        prev_cutpoint = value
+                        first_cutpoint = True
+                    prev_value = value
+                name: str = (  # pyright: ignore [reportRedeclaration]
+                    f"{prev_cutpoint}<{feature}"
+                )
+                col: pl.Series = (  # pyright: ignore [reportRedeclaration]
+                    X[feature] > prev_cutpoint
+                ).alias(name)
+                if self.test(col, y):
+                    self.__selected.add(name)
+                    Xbin = Xbin.hstack([col])
+
+                if len(cutpoints) == 0:
+                    cp_tmp = sorted_values[feature].mean()
+                    try:
+                        cp = float(str(cp_tmp)) if cp_tmp is not None else 0.0
+                    except (ValueError, TypeError):
+                        print("Error at error check 1")
+                        cp = 0.0
+
+                    cutpoints.add(cp)
+                self.__cutpoints.append((True, sorted(cutpoints)))
+            else:
+                values = col_y[feature].unique().to_list()
+                cps = []
+                for value in values:
+                    name: str = f"{feature}={value}"
+                    col: pl.Series = (col_y[feature] == value).alias(name)
+                    if self.test(col, y):
+                        self.__selected.add(name)
+                        Xbin = Xbin.hstack([col])
+                        cps.append(name)
+                self.__cutpoints.append((False, cps))
+        return Xbin
