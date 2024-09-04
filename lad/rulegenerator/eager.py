@@ -1,6 +1,7 @@
 import copy
 
 import polars as pl
+from tqdm.auto import tqdm
 
 from lad.binarizer.cutpoint import CutpointBinarizer
 from lad.featureselection.greedy import GreedySetCover
@@ -73,7 +74,9 @@ class MaxPatterns:
             if len(X_pos) == 0:
                 break
             curr_degree_non_prime_patterns = []
-            for curr_base_patterns in prev_degree_non_prime_patterns:
+            for curr_base_patterns in tqdm(
+                prev_degree_non_prime_patterns, desc=f"{d} depth rule generation"
+            ):
                 if len(X_pos) == 0:
                     break
                 largets_idx_of_terms_in_curr_patterns = -1
@@ -87,7 +90,10 @@ class MaxPatterns:
 
                 start_of_range = largets_idx_of_terms_in_curr_patterns + 1
 
-                for i in range(start_of_range, feature_count):
+                for i in tqdm(
+                    range(start_of_range, feature_count),
+                    desc=f"{curr_base_patterns} rule analysis",
+                ):
                     for possible_term in [True, False]:
                         if len(X_pos) == 0:
                             break
