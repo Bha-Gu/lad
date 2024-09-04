@@ -90,10 +90,7 @@ class MaxPatterns:
 
                 start_of_range = largets_idx_of_terms_in_curr_patterns + 1
 
-                for i in tqdm(
-                    range(start_of_range, feature_count),
-                    desc=f"{curr_base_patterns} rule analysis",
-                ):
+                for i in range(start_of_range, feature_count):
                     for possible_term in [True, False]:
                         if len(X_pos) == 0:
                             break
