@@ -51,6 +51,7 @@ class LADClassifier:
         self.__max = 4
         self.model: MaxPatterns | None = None
         self.__labels = pl.Series()
+        self.__inplace = in_place
 
     def __handle_labels(self, y: pl.Series) -> pl.Series:
         self.__labels = y.unique()
