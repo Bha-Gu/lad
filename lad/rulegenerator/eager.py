@@ -70,7 +70,7 @@ class MaxPatterns:
         if max > feature_count or max == 0:
             max = feature_count
         print(max)
-        for d in range(1, max):
+        for d in range(1, max + 1):
             if len(X_pos) == 0:
                 break
             curr_degree_non_prime_patterns = []
