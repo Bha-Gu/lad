@@ -72,7 +72,6 @@ class CutpointBinarizer:
         features = X.columns
 
         for feature in tqdm(features, desc="Cutpoint Generation"):
-            print(feature)
             col_y: pl.DataFrame = pl.DataFrame([X[feature], y])
             if schema[feature].is_numeric():
                 sorted_values: pl.DataFrame = col_y.sort(feature)
@@ -87,7 +86,14 @@ class CutpointBinarizer:
                 prev_value: float | None = None
                 labels: set[str] = set()
 
-                for value, label in sorted_values.rows():
+                values = sorted_values[feature]
+
+                labeles = sorted_values["label"]
+
+                for idx in tqdm(
+                    range(len(values)), desc=f"Processing feature {feature}"
+                ):
+                    value, label = values[idx], labeles[idx]
                     labels.add(label)
 
                     if prev_value is not None:
@@ -97,8 +103,8 @@ class CutpointBinarizer:
                                 len(prev_labels) > 1 or len(labels) > 1
                             ) or prev_labels != labels:
                                 cp: float = (  # pyright: ignore [reportRedeclaration]
-                                    prev_value + (value - prev_value) / 2.0
-                                )
+                                    value + prev_value
+                                ) / 2.0
                                 if first_cutpoint:
                                     name: (  # pyright: ignore [reportRedeclaration]
                                         str
@@ -139,7 +145,7 @@ class CutpointBinarizer:
                     f"{prev_cutpoint}<{feature}"
                 )
                 col: pl.Series = (  # pyright: ignore [reportRedeclaration]
-                    X[feature] > prev_cutpoint
+                    col_y[feature] > prev_cutpoint
                 ).alias(name)
                 if self.test(col, y):
                     self.__selected.add(name)
