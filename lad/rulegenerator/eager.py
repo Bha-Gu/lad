@@ -38,29 +38,28 @@ class MaxPatterns:
         self.__selector = selector
 
     def predict(self, X: pl.DataFrame) -> pl.Series:
-        proba = self.predict_proba(X)
-        return pl.Series([pl.Series(i).arg_max() for i in proba])
+        proba = pl.DataFrame(self.predict_proba(X))
+        return (
+            proba.select(pl.concat_list(pl.all()))
+            .to_series()
+            .map_elements(lambda x: pl.Series(x).arg_max(), return_dtype=pl.Int64)
+        )
 
-    def predict_proba(self, X: pl.DataFrame) -> list[list[float]]:
+    def predict_proba(self, X: pl.DataFrame) -> list[pl.Series]:
         X = self.__selector.transform(self.__binarizer.transform(X))
-        y = []
-        columns = X.columns
-        for sample in X.rows():
-            prediction = []
-            for r in self.__rules:
-                out = False
-                t_c = 1.0
-                for c, rule in r:
-                    tmp = True
-                    for v, f in rule:
-                        tmp &= sample[columns.index(f)] == v
-                    out |= tmp
-                    if tmp:
-                        t_c *= 1 - c
+        prediction = []
+        for r in self.__rules:
+            out = pl.Series([False for _ in range(len(X))])
+            t_c = pl.Series([1.0 for _ in range(len(X))])
+            for c, rule in r:
+                tmp = pl.Series([True for _ in range(len(X))])
+                for v, f in rule:
+                    tmp &= X[f] == v
+                out |= tmp
+                t_c *= 1 - c * tmp.cast(pl.Int8)
 
-                prediction.append(1 - t_c)
-            y.append(prediction)
-        return y
+            prediction.append(1 - t_c)
+        return prediction
 
     def __base_fit(self, X_pos: pl.DataFrame, X_neg: pl.DataFrame, feature_count):
         size = X_pos.shape[0] + X_neg.shape[0]
@@ -77,7 +76,6 @@ class MaxPatterns:
             for curr_base_patterns in tqdm(
                 prev_degree_non_prime_patterns,
                 desc=f"{d} depth rule generation",
-                leave=False,
             ):
                 if len(X_pos) == 0:
                     break
@@ -132,11 +130,11 @@ class MaxPatterns:
                                 hd = pos_pct / base
 
                             if hd >= self.__base_precision:
-                                hd *= len(X_pos) + len(X_neg)
-                                hd /= size
+                                # hd *= len(X_pos) + len(X_neg)
+                                # hd /= size
                                 prime_patterns.append((hd, possible_next_pattern))
-                                X_pos = X_pos.filter(~filter)
-                                X_neg = X_neg.filter(~filter)
+                                # X_pos = X_pos.filter(~filter)
+                                # X_neg = X_neg.filter(~filter)
                             else:
                                 curr_degree_non_prime_patterns.append(
                                     possible_next_pattern
