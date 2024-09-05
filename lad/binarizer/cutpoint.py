@@ -59,7 +59,11 @@ class CutpointBinarizer:
 
         normalized_final: float = final / upper_bound if upper_bound != 0 else 0
 
-        passed: bool = normalized_final >= 1 / class_count
+        class_ratios = y_t / y_t.sum()
+
+        gini_impurity = 1 - sum([ratio**2 for ratio in class_ratios])
+
+        passed: bool = normalized_final >= gini_impurity
 
         return passed
 
