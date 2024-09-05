@@ -69,6 +69,7 @@ class MaxPatterns:
         max = self.__max_terms
         if max > feature_count or max == 0:
             max = feature_count
+        print(max)
         for d in range(1, max):
             if len(X_pos) == 0:
                 break
@@ -90,11 +91,7 @@ class MaxPatterns:
 
                 start_of_range = largets_idx_of_terms_in_curr_patterns + 1
 
-                for i in tqdm(
-                    range(start_of_range, feature_count),
-                    desc="Considering features",
-                    leave=False,
-                ):
+                for i in range(start_of_range, feature_count):
                     for possible_term in [True, False]:
                         if len(X_pos) == 0:
                             break
@@ -118,7 +115,7 @@ class MaxPatterns:
                             filter &= f
                         pos_count_prime = len(X_pos.filter(filter))
 
-                        if self.__base_recall <= 2 * pos_count_prime / len(X_pos):
+                        if self.__base_recall <= pos_count_prime / len(X_pos):
                             pos_count = len(X_pos.filter(filter))
                             neg_count = len(X_neg.filter(filter))
 
