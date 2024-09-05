@@ -59,7 +59,7 @@ class CutpointBinarizer:
 
         normalized_final: float = final / upper_bound if upper_bound != 0 else 0
 
-        passed: bool = normalized_final > 1 / class_count
+        passed: bool = normalized_final >= 1 / class_count
 
         return passed
 
@@ -100,7 +100,10 @@ class CutpointBinarizer:
 
                     if prev_value is not None:
                         variation: float = value - prev_cutpoint
-                        if variation > tolerance * self.__bin_size:
+                        if (
+                            variation > tolerance * self.__bin_size
+                            and value != prev_value
+                        ):
                             if (
                                 len(prev_labels) > 1 or len(labels) > 1
                             ) or prev_labels != labels:
@@ -180,7 +183,6 @@ class CutpointBinarizer:
         for column_name, (type_val, cutpoints) in tqdm(
             zip(X.columns, self.__cutpoints), desc="Transforming data"
         ):
-            print(column_name)
             column: pl.Series = X[column_name]
             if type_val:
                 name: str = f"{column_name}<={cutpoints[0]}"
