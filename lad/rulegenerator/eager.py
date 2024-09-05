@@ -75,7 +75,9 @@ class MaxPatterns:
                 break
             curr_degree_non_prime_patterns = []
             for curr_base_patterns in tqdm(
-                prev_degree_non_prime_patterns, desc=f"{d} depth rule generation"
+                prev_degree_non_prime_patterns,
+                desc=f"{d} depth rule generation",
+                leave=False,
             ):
                 if len(X_pos) == 0:
                     break
@@ -90,7 +92,11 @@ class MaxPatterns:
 
                 start_of_range = largets_idx_of_terms_in_curr_patterns + 1
 
-                for i in range(start_of_range, feature_count):
+                for i in tqdm(
+                    range(start_of_range, feature_count),
+                    desc="Considering features",
+                    leave=False,
+                ):
                     for possible_term in [True, False]:
                         if len(X_pos) == 0:
                             break

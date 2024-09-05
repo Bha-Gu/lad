@@ -91,7 +91,9 @@ class CutpointBinarizer:
                 labeles = sorted_values["label"]
 
                 for idx in tqdm(
-                    range(len(values)), desc=f"Processing feature {feature}"
+                    range(len(values)),
+                    desc=f"Processing feature {feature}",
+                    leave=False,
                 ):
                     value, label = values[idx], labeles[idx]
                     labels.add(label)
