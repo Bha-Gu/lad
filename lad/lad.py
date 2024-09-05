@@ -47,7 +47,7 @@ class LADClassifier:
         self.bin_size = bin_size
         self.__base_precision = base_precision
         self.__base_recall = base_recall
-        self.__max = 4
+        self.__max = max_terms_in_patterns
         self.model: MaxPatterns | None = None
         self.__labels = pl.Series()
 
