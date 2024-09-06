@@ -113,7 +113,6 @@ class MaxPatterns:
                             continue
                         curr_degree_non_prime_patterns.append(possible_next_pattern)
             size = len(curr_degree_non_prime_patterns)
-            print(curr_degree_non_prime_patterns)
             scores = pl.Series([0.0 for _ in range(size)])
             selected = []
             got = True
@@ -138,7 +137,6 @@ class MaxPatterns:
                     neg_len = len(X_neg)
                     base = TP + p_s + FP + n_s
                     recall = (TP + p_s) / base if base > 0.0 else 0.0
-                    print(TP, p_s, pos_shape, recall, filter)
                     if self.__base_recall <= recall and pos_len > 0.0:
                         precision = TP / pos_len - FP / neg_len
                         scores[i] = precision
@@ -159,7 +157,6 @@ class MaxPatterns:
                 for f in filters[1:]:
                     filter &= f
                 X_pos = X_pos.filter(~filter)
-                print(X_pos.shape[0], len(X_pos))
                 p_s = pos_shape - X_pos.shape[0]
                 X_neg = X_neg.filter(~filter)
                 n_s = neg_shape - X_neg.shape[0]
