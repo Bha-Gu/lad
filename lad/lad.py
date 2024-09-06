@@ -43,6 +43,7 @@ class LADClassifier:
         base_precision: float = 0.5,
         base_recall: float = 0.5,
         max_terms_in_patterns: int = 4,
+        new_test: bool = False,
     ):
         self.bin_size = bin_size
         self.__base_precision = base_precision
@@ -50,6 +51,7 @@ class LADClassifier:
         self.__max = max_terms_in_patterns
         self.model: MaxPatterns | None = None
         self.__labels = pl.Series()
+        self.__new_test = new_test
 
     def __handle_labels(self, y: pl.Series) -> pl.Series:
         self.__labels = y.unique()
@@ -78,7 +80,12 @@ class LADClassifier:
 
         print("# Rule building")
         self.model = MaxPatterns(
-            cpb, gsc, self.__base_precision, self.__base_recall, self.__max
+            cpb,
+            gsc,
+            self.__base_precision,
+            self.__base_recall,
+            self.__max,
+            self.__new_test,
         )
         rules = self.model.fit(Xbin, y)
 
