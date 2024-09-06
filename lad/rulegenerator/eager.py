@@ -113,6 +113,7 @@ class MaxPatterns:
                             continue
                         curr_degree_non_prime_patterns.append(possible_next_pattern)
             size = len(curr_degree_non_prime_patterns)
+            print(curr_degree_non_prime_patterns)
             scores = pl.Series([0.0 for _ in range(size)])
             selected = []
             got = True
