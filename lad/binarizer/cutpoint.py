@@ -61,7 +61,10 @@ class CutpointBinarizer:
 
         class_ratios = y_t / y_t.sum()
 
-        gini_impurity = 1 - sum([ratio**2 for ratio in class_ratios])
+        gini_impurity = (
+            1
+            - sum([ratio**2 + (1 - ratio) ** 2 for ratio in class_ratios]) / class_count
+        )
 
         passed: bool = normalized_final >= gini_impurity
 
