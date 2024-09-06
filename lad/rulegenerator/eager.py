@@ -137,13 +137,14 @@ class MaxPatterns:
                     neg_len = len(X_neg)
                     recall = TP + p_s / (TP + FP + p_s + n_s)
                     if self.__base_recall <= recall and pos_len > 0.0:
+                        print(recall)
                         precision = TP / pos_len
                         scores[i] = precision
                         got = True
                     else:
                         scores[i] = 0.0
                 best = scores.arg_max()
-                if best is None or scores[best] <= 0.0:
+                if best is None or scores[best] <= self.__base_precision:
                     break
                 selected.append(best)
                 filters = [
