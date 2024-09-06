@@ -62,7 +62,7 @@ class MaxPatterns:
         return prediction
 
     def __base_fit(self, X_pos: pl.DataFrame, X_neg: pl.DataFrame, feature_count):
-        size = X_pos.shape[0] + X_neg.shape[0]
+        size = X_pos.shape[0]
         prime_patterns = []
         prev_degree_non_prime_patterns = [set()]
         features = X_pos.columns
@@ -70,6 +70,8 @@ class MaxPatterns:
         if max > feature_count or max == 0:
             max = feature_count
         print(max)
+        pos = 0
+        neg = 0
         for d in range(1, max + 1):
             if len(X_pos) == 0:
                 break
@@ -115,23 +117,24 @@ class MaxPatterns:
                             filter &= f
                         pos_count_prime = len(X_pos.filter(filter))
 
-                        if self.__base_recall <= pos_count_prime / len(X_pos):
+                        if self.__base_recall <= (pos_count_prime + pos) / size:
                             pos_count = len(X_pos.filter(filter))
                             neg_count = len(X_neg.filter(filter))
 
-                            pos_pct = pos_count
-                            neg_pct = neg_count
+                            pos_pct = pos_count + pos
+                            neg_pct = neg_count + neg
                             base = pos_pct + neg_pct
                             hd = 0.0
                             if base > 0.0:
                                 hd = pos_pct / base
 
                             if hd >= self.__base_precision:
-                                # hd *= len(X_pos) + len(X_neg)
-                                # hd /= size
+                                pos = pos_pct
+                                neg = neg_pct
+                                hd = pos / (pos + neg)
                                 prime_patterns.append((hd, possible_next_pattern))
-                                # X_pos = X_pos.filter(~filter)
-                                # X_neg = X_neg.filter(~filter)
+                                X_pos = X_pos.filter(~filter)
+                                X_neg = X_neg.filter(~filter)
                             else:
                                 curr_degree_non_prime_patterns.append(
                                     possible_next_pattern
