@@ -157,6 +157,7 @@ class MaxPatterns:
                 for f in filters[1:]:
                     filter &= f
                 X_pos = X_pos.filter(~filter)
+                print(X_pos.shape[0], len(X_pos))
                 p_s = pos_shape - X_pos.shape[0]
                 X_neg = X_neg.filter(~filter)
                 n_s = neg_shape - X_neg.shape[0]
