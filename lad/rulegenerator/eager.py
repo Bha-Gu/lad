@@ -137,7 +137,7 @@ class MaxPatterns:
                     neg_len = len(X_neg)
                     recall = TP + p_s / (pos_shape)
                     if self.__base_recall <= recall and pos_len > 0.0:
-                        print(p_s, recall)
+                        print(TP, p_s, pos_shape, recall)
                         precision = TP / pos_len
                         scores[i] = precision
                         got = True
