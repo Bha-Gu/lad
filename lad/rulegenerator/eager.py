@@ -277,5 +277,5 @@ class MaxPatterns:
                 neg_count = len(X_neg.filter(filter))
                 acc = (pos_count + neg_count) / X.shape[0]
                 patts.append((acc, p))
-            self.__rules.append(patterns)
+            self.__rules.append(patts)
         return self.__rules
