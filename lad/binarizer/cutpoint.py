@@ -82,11 +82,10 @@ class CutpointBinarizer:
             col_y: pl.DataFrame = pl.DataFrame([X[feature], y])
             if schema[feature].is_numeric():
                 sorted_values: pl.DataFrame = col_y.sort(feature)
-                print(sorted_values)
                 delta: float = (
                     sorted_values[feature].diff(null_behavior="drop") ** 2
                 ).sum() ** 0.5
-                print(delta)
+                delta = abs(delta)
                 tolerance: float = delta / (len(sorted_values) - 1)
                 cutpoints: set[float] = set()
                 prev_cutpoint: float | None = None
