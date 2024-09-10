@@ -85,6 +85,7 @@ class CutpointBinarizer:
                 delta: float = (
                     sorted_values[feature].diff(null_behavior="drop") ** 2
                 ).sum() ** 0.5
+                print(delta)
                 tolerance: float = delta / (len(sorted_values) - 1)
                 cutpoints: set[float] = set()
                 prev_cutpoint: float | None = None
