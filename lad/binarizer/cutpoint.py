@@ -82,6 +82,7 @@ class CutpointBinarizer:
             col_y: pl.DataFrame = pl.DataFrame([X[feature], y])
             if schema[feature].is_numeric():
                 sorted_values: pl.DataFrame = col_y.sort(feature)
+                print(sorted_values)
                 delta: float = (
                     sorted_values[feature].diff(null_behavior="drop") ** 2
                 ).sum() ** 0.5
