@@ -165,6 +165,7 @@ class MaxPatterns:
                     for f in filters[1:]:
                         filter &= f
                     matches = X_base.filter(filter).select(pl.col("target"))["target"]
+                    print(labels, matches)
                     counts = copy.deepcopy(labels).append(matches).unique_counts()
                     for l in range(len(labels)):
                         counts[l] -= 1
