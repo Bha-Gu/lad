@@ -150,7 +150,7 @@ class MaxPatterns:
             got = True
             while got:
                 got = False
-                for i in range(size):
+                for i in tqdm(range(size), decs=""):
                     if i in selected:
                         for l in range(len(labels)):
                             scores[l][i] = -1
@@ -191,7 +191,7 @@ class MaxPatterns:
                     score.arg_max() if float(str(score.max())) > 0.0 else None
                     for score in scores
                 ]
-                for l in range(len(labels)):
+                for l in tqdm(range(len(labels)), desc="l"):
                     best = bests[l]
                     if best is None or scores[l][best] < self.__base_precision:
                         continue
