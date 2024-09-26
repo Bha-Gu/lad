@@ -150,7 +150,7 @@ class MaxPatterns:
             got = True
             while got:
                 got = False
-                for i in tqdm(range(size), desc=""):
+                for i in range(size):
                     if i in selected:
                         for l in range(len(labels)):
                             scores[l][i] = -1
@@ -178,6 +178,8 @@ class MaxPatterns:
 
                     r_pass = [recall >= self.__base_recall for recall in recalls]
 
+                    print(recalls)
+
                     for l in range(len(labels)):
                         if r_pass[l] and lens[l] > 0 and (lens.sum() - lens[l]) > 0:
                             scores[l][i] = counts[l] / lens[l] - (
@@ -187,11 +189,12 @@ class MaxPatterns:
                         else:
                             scores[l][i] = 0.0
 
+                    print(scores)
                 bests = [
                     score.arg_max() if float(str(score.max())) > 0.0 else None
                     for score in scores
                 ]
-                for l in tqdm(range(len(labels)), desc="l"):
+                for l in range(len(labels)):
                     best = bests[l]
                     if best is None or scores[l][best] < self.__base_precision:
                         continue
