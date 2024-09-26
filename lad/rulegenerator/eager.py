@@ -150,7 +150,7 @@ class MaxPatterns:
             got = True
             while got:
                 got = False
-                for i in tqdm(range(size), decs=""):
+                for i in tqdm(range(size), desc=""):
                     if i in selected:
                         for l in range(len(labels)):
                             scores[l][i] = -1
