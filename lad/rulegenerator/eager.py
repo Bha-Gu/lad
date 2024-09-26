@@ -169,6 +169,8 @@ class MaxPatterns:
                     for l in range(len(labels)):
                         counts[l] -= 1
 
+                    print(counts)
+
                     recalls = [
                         (count + r_s) / (counts.sum() + removed_sizes.sum())
                         if (counts.sum() + removed_sizes.sum()) > 0
