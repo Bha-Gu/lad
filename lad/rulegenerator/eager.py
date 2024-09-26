@@ -226,8 +226,10 @@ class MaxPatterns:
                 if i not in selected_flat
             ]
             for l in range(len(labels)):
+                base_patterns = []
                 for i in selected_flat:
-                    prime_patterns.append(curr_degree_non_prime_patterns[i])
+                    base_patterns.append(curr_degree_non_prime_patterns[i])
+                prime_patterns.append(base_patterns)
         self.__rules = prime_patterns
         return prime_patterns
 
