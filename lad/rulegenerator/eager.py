@@ -171,6 +171,8 @@ class MaxPatterns:
 
                     recalls = [
                         (count + r_s) / (counts.sum() + removed_sizes.sum())
+                        if (counts.sum() + removed_sizes.sum()) > 0
+                        else 0.0
                         for count, r_s in zip(counts, removed_sizes)
                     ]
 
