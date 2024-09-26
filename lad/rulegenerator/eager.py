@@ -164,13 +164,14 @@ class MaxPatterns:
                     filter = filters[0]
                     for f in filters[1:]:
                         filter &= f
+                    print(X_base)
                     matches = X_base.filter(filter).select(pl.col("target"))["target"]
                     print(labels, matches)
                     counts = copy.deepcopy(labels).append(matches).unique_counts()
                     for l in range(len(labels)):
                         counts[l] -= 1
 
-                    print(counts)
+                    # print(counts)
 
                     recalls = [
                         (count + r_s) / (counts.sum() + removed_sizes.sum())
@@ -181,7 +182,7 @@ class MaxPatterns:
 
                     r_pass = [recall >= self.__base_recall for recall in recalls]
 
-                    print(recalls)
+                    # print(recalls)
 
                     for l in range(len(labels)):
                         if r_pass[l] and lens[l] > 0 and (lens.sum() - lens[l]) > 0:
@@ -192,7 +193,7 @@ class MaxPatterns:
                         else:
                             scores[l][i] = 0.0
 
-                    print(scores)
+                    # print(scores)
                 bests = [
                     score.arg_max() if float(str(score.max())) > 0.0 else None
                     for score in scores
