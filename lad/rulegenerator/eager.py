@@ -171,7 +171,7 @@ class MaxPatterns:
                     for l in range(len(labels)):
                         counts[l] -= 1
 
-                    print(counts)
+                    # print(counts)
 
                     recalls = [
                         (count + r_s) / (counts.sum() + removed_sizes.sum())
@@ -182,7 +182,7 @@ class MaxPatterns:
 
                     r_pass = [recall >= self.__base_recall for recall in recalls]
 
-                    print(recalls)
+                    # print(recalls)
 
                     for l in range(len(labels)):
                         if r_pass[l] and lens[l] > 0 and (lens.sum() - lens[l]) > 0:
@@ -194,7 +194,7 @@ class MaxPatterns:
                         else:
                             scores[l][i] = 0.0
 
-                    print(scores)
+                    # print(scores)
                 bests = [
                     score.arg_max() if float(str(score.max())) > 0.0 else None
                     for score in scores
@@ -226,10 +226,8 @@ class MaxPatterns:
                 if i not in selected_flat
             ]
             for l in range(len(labels)):
-                base_patterns = []
                 for i in selected_flat:
-                    base_patterns.append(curr_degree_non_prime_patterns[i])
-                prime_patterns.append(base_patterns)
+                    prime_patterns[l].append(curr_degree_non_prime_patterns[i])
         self.__rules = prime_patterns
         return prime_patterns
 
