@@ -141,9 +141,10 @@ class MaxPatterns:
             size = len(curr_degree_non_prime_patterns)
             scores = [
                 pl.Series(
-                    ([0.0 for _ in range(size)] for _ in range(len(labels))),
+                    [0.0 for _ in range(size)],
                     dtype=pl.Float64,
                 )
+                for _ in range(len(labels))
             ]
             selected = [[] for _ in range(len(labels))]
             got = True
