@@ -199,7 +199,7 @@ class MaxPatterns:
                     score.arg_max()
                     if (
                         float(str(score.max())) > 0.0
-                        if score.max is not None
+                        if score.max() is not None
                         else False
                     )
                     else None
