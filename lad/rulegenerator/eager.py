@@ -196,7 +196,13 @@ class MaxPatterns:
 
                     # print(scores)
                 bests = [
-                    score.arg_max() if float(str(score.max())) > 0.0 else None
+                    score.arg_max()
+                    if (
+                        float(str(score.max())) > 0.0
+                        if score.max is not None
+                        else False
+                    )
+                    else None
                     for score in scores
                 ]
                 for l in range(len(labels)):
